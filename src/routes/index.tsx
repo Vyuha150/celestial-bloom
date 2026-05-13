@@ -3,13 +3,15 @@ import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
 import heroFlatlay from "@/assets/hero-flatlay.jpg";
-const heroVideo = { url: "/__l5e/assets-v1/6566d8f9-5964-4021-9af0-b577dfa9ffd0/hero-video.mp4" };
 import banner1 from "@/assets/banner-product-1.jpg";
 import banner2 from "@/assets/banner-product-2.jpg";
 import productCapsule from "@/assets/product-capsule.jpg";
 import iconLeaf from "@/assets/icon-leaf.png";
 import iconMolecule from "@/assets/icon-molecule.png";
 import iconGem from "@/assets/icon-gem.png";
+
+const HERO_VIDEO_URL =
+  "/__l5e/assets-v1/6566d8f9-5964-4021-9af0-b577dfa9ffd0/hero-video.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,56 +66,47 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden">
-      {/* Full-bleed background still */}
-      <motion.img
-        initial={{ scale: 1.08, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 2, ease }}
+    <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden bg-obsidian">
+      {/* Full-bleed background still (lowest layer) */}
+      <img
         src={heroFlatlay}
         alt="Celestial luxury supplement bottles flat lay with gold leaf accents"
-        width={1600}
-        height={1280}
-        className="absolute inset-0 -z-20 h-full w-full object-cover"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-40"
       />
-      {/* Cinematic luxury video, right-anchored, edge-blended (no box) */}
-      <motion.video
-        initial={{ opacity: 0, scale: 1.05 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.4, ease, delay: 0.2 }}
-        src={heroVideo.url}
+      {/* Cinematic luxury video, right-anchored, edge-blended */}
+      <video
+        src={HERO_VIDEO_URL}
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
         poster={heroFlatlay}
-        className="absolute inset-y-0 right-0 -z-20 h-full w-full object-cover md:w-[70%]"
+        className="pointer-events-none absolute inset-y-0 right-0 z-[1] h-full w-full object-cover md:w-[72%]"
         style={{
           maskImage:
-            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 45%)",
+            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 22%, rgba(0,0,0,1) 50%)",
           WebkitMaskImage:
-            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 45%)",
+            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 22%, rgba(0,0,0,1) 50%)",
         }}
       />
-      {/* Cinematic overlays — blend media into page */}
-      <div className="absolute inset-0 -z-10 bg-obsidian/45" />
+      {/* Cinematic overlays — sit ABOVE media but BELOW content */}
       <div
-        className="absolute inset-0 -z-10"
+        className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 78%, transparent) 38%, color-mix(in oklab, var(--obsidian) 30%, transparent) 70%, transparent 100%)",
+            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 70%, transparent) 38%, color-mix(in oklab, var(--obsidian) 15%, transparent) 70%, transparent 100%)",
         }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 -z-10 h-56"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-56"
         style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
       />
       <div
-        className="absolute inset-x-0 top-0 -z-10 h-32"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-32"
         style={{ background: "linear-gradient(to bottom, var(--obsidian), transparent)" }}
       />
-      <div className="absolute inset-0 -z-10 bg-grain" />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-grain" />
 
       {/* corner ribbon */}
       <motion.div
