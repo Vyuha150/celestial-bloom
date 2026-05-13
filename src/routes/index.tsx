@@ -339,14 +339,6 @@ function Science() {
 }
 
 function Universe() {
-  const cats = [
-    { t: "Core Performance Stack", n: "07 SKU", items: ["Precision Greens v.12+", "Mitochondrial Energy", "Cognitive Blend", "Adaptogen Stress"] },
-    { t: "Bioavailability Capsules", n: "07 SKU", items: ["Liposomal Vitamin C", "Nanoemulsion CoQ10", "Magnesium Glycinate", "D3 + K2 in MCT"] },
-    { t: "Precision Powders", n: "06 SKU", items: ["Whey Isolate · grass-fed", "Collagen Peptides I+III", "Creatine Creapure®", "Reishi + Lion's Mane"] },
-    { t: "Functional Beverages", n: "07 SKU", items: ["Nootropic Focus Shot", "NMN Longevity Elixir", "H₂-Rich Mineral Water", "KSM-66 Latte"] },
-    { t: "Smart Gummies & Strips", n: "07 SKU", items: ["NAD+ Longevity Gummy", "Melatonin + L-Theanine", "Astaxanthin Antioxidant", "B12 Sublingual Strip"] },
-    { t: "Diagnostic Protocols", n: "06 SKU", items: ["At-home Biomarker Test", "30-Day Performance Box", "Athlete's Quarterly Refill", "Corporate Stack"] },
-  ];
   return (
     <section id="universe" className="border-t border-border py-28">
       <div className="mx-auto max-w-[1320px] px-8">
@@ -354,12 +346,12 @@ function Universe() {
           <div>
             <div className="text-eyebrow mb-5">The Product Universe</div>
             <h2 className="text-display max-w-2xl text-5xl text-ivory lg:text-6xl">
-              Forty formulations.<br />
+              {totalSkus} formulations.<br />
               <span className="italic text-champagne">One operating system</span> for the body.
             </h2>
           </div>
           <div className="hidden text-right md:block">
-            <div className="text-display text-5xl text-gold">40+</div>
+            <div className="text-display text-5xl text-gold">{totalSkus}</div>
             <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-ivory/50">Active SKUs</div>
           </div>
         </div>
@@ -371,33 +363,59 @@ function Universe() {
           variants={stagger}
           className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-2 lg:grid-cols-3"
         >
-          {cats.map((c, i) => (
+          {categories.map((c, i) => (
             <motion.article
-              key={c.t}
+              key={c.slug}
               variants={fadeUp}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.5, ease }}
-              className="group relative cursor-pointer bg-obsidian p-10 transition-all duration-700 hover:bg-midnight"
+              className="group relative cursor-pointer overflow-hidden bg-obsidian transition-all duration-700 hover:bg-midnight"
             >
-              <div className="flex items-start justify-between">
-                <span className="text-eyebrow">{String(i + 1).padStart(2, "0")}</span>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-ivory/40">{c.n}</span>
-              </div>
-              <h3 className="text-display mt-10 text-3xl text-ivory">{c.t}</h3>
-              <ul className="mt-7 space-y-2 text-sm text-ivory/55">
-                {c.items.map((it) => (
-                  <li key={it} className="flex items-center gap-3">
-                    <span className="h-px w-3 bg-gold" />
-                    {it}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-gold transition-all group-hover:gap-5">
-                Explore range →
-              </div>
+              <Link to="/universe" hash={c.slug} className="block">
+                <div className="relative h-44 overflow-hidden">
+                  <motion.img
+                    src={c.image}
+                    alt={c.title}
+                    width={1024}
+                    height={1024}
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-80 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent" />
+                </div>
+                <div className="p-8">
+                  <div className="flex items-start justify-between">
+                    <span className="text-eyebrow">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-ivory/40">
+                      {String(c.items.length).padStart(2, "0")} SKU
+                    </span>
+                  </div>
+                  <h3 className="text-display mt-6 text-2xl text-ivory">{c.title}</h3>
+                  <ul className="mt-5 space-y-1.5 text-[13px] text-ivory/55">
+                    {c.items.slice(0, 4).map((it) => (
+                      <li key={it} className="flex items-center gap-3">
+                        <span className="h-px w-3 bg-gold" />
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-7 inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-gold transition-all group-hover:gap-5">
+                    Explore range →
+                  </div>
+                </div>
+              </Link>
             </motion.article>
           ))}
         </motion.div>
+
+        <div className="mt-12 text-center">
+          <Link
+            to="/universe"
+            className="inline-flex rounded-full bg-gold px-9 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne"
+          >
+            Enter the full universe →
+          </Link>
+        </div>
       </div>
     </section>
   );
