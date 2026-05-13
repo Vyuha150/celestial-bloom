@@ -50,7 +50,7 @@ function Nav() {
         <nav className="hidden gap-10 text-[10.5px] tracking-[0.3em] uppercase text-ivory/70 md:flex">
           <a href="#science" className="transition-colors hover:text-gold">Science</a>
           <a href="#protocol" className="transition-colors hover:text-gold">Protocol</a>
-          <a href="#universe" className="transition-colors hover:text-gold">Universe</a>
+          <Link to="/universe" className="transition-colors hover:text-gold">Universe</Link>
           <a href="#journal" className="transition-colors hover:text-gold">Journal</a>
         </nav>
         <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
