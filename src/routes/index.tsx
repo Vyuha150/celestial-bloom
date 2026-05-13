@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
 import heroFlatlay from "@/assets/hero-flatlay.jpg";
