@@ -3,6 +3,7 @@ import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
 import heroFlatlay from "@/assets/hero-flatlay.jpg";
+import heroVideo from "@/assets/hero-video.mp4.asset.json";
 import banner1 from "@/assets/banner-product-1.jpg";
 import banner2 from "@/assets/banner-product-2.jpg";
 import productCapsule from "@/assets/product-capsule.jpg";
