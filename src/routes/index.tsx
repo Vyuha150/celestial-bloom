@@ -64,7 +64,7 @@ function Nav() {
 function Hero() {
   return (
     <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden">
-      {/* Full-bleed background image */}
+      {/* Full-bleed background still */}
       <motion.img
         initial={{ scale: 1.08, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -75,18 +75,42 @@ function Hero() {
         height={1280}
         className="absolute inset-0 -z-20 h-full w-full object-cover"
       />
-      {/* Cinematic overlays — blend image into page */}
-      <div className="absolute inset-0 -z-10 bg-obsidian/55" />
+      {/* Cinematic luxury video, right-anchored, edge-blended (no box) */}
+      <motion.video
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 2.4, ease, delay: 0.2 }}
+        src={heroVideo.url}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        poster={heroFlatlay}
+        className="absolute inset-y-0 right-0 -z-20 h-full w-full object-cover md:w-[70%]"
+        style={{
+          maskImage:
+            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 45%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 18%, rgba(0,0,0,1) 45%)",
+        }}
+      />
+      {/* Cinematic overlays — blend media into page */}
+      <div className="absolute inset-0 -z-10 bg-obsidian/45" />
       <div
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 70%, transparent) 45%, transparent 75%)",
+            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 78%, transparent) 38%, color-mix(in oklab, var(--obsidian) 30%, transparent) 70%, transparent 100%)",
         }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 -z-10 h-48"
+        className="absolute inset-x-0 bottom-0 -z-10 h-56"
         style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 -z-10 h-32"
+        style={{ background: "linear-gradient(to bottom, var(--obsidian), transparent)" }}
       />
       <div className="absolute inset-0 -z-10 bg-grain" />
 
