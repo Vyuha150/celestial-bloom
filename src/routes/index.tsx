@@ -62,92 +62,97 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-grain pt-32">
-      <div className="absolute inset-0 -z-10" style={{ background: "var(--gradient-veil)" }} />
+    <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden">
+      {/* Full-bleed background image */}
+      <motion.img
+        initial={{ scale: 1.08, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 2, ease }}
+        src={heroFlatlay}
+        alt="Celestial luxury supplement bottles flat lay with gold leaf accents"
+        width={1600}
+        height={1280}
+        className="absolute inset-0 -z-20 h-full w-full object-cover"
+      />
+      {/* Cinematic overlays — blend image into page */}
+      <div className="absolute inset-0 -z-10 bg-obsidian/55" />
+      <div
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 70%, transparent) 45%, transparent 75%)",
+        }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 -z-10 h-48"
+        style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
+      />
+      <div className="absolute inset-0 -z-10 bg-grain" />
 
       {/* corner ribbon */}
       <motion.div
         initial={{ opacity: 0, x: 40, y: -40 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ duration: 1.2, ease }}
-        className="absolute right-0 top-0 z-10 hidden md:block"
+        className="pointer-events-none absolute right-0 top-0 z-10 hidden md:block"
       >
-        <div className="relative h-32 w-72 overflow-hidden">
-          <div className="absolute -right-20 top-8 w-[28rem] rotate-45 bg-gold py-2 text-center text-[10px] uppercase tracking-[0.4em] text-obsidian">
+        <div className="relative h-28 w-64 overflow-hidden">
+          <div className="absolute -right-20 top-7 w-[26rem] rotate-45 bg-gold py-1.5 text-center text-[9px] uppercase tracking-[0.4em] text-obsidian">
             ✦ Volume 01 — 2026
           </div>
         </div>
       </motion.div>
 
-      <div className="mx-auto max-w-[1320px] px-8">
+      <div className="relative mx-auto flex w-full max-w-[1320px] flex-1 flex-col px-8 pt-24">
         <motion.div
           initial="hidden"
           animate="show"
           variants={stagger}
-          className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12"
+          className="flex flex-1 flex-col justify-center"
         >
-          <div className="flex flex-col justify-center lg:col-span-6">
-            <motion.div variants={fadeUp} className="text-eyebrow mb-6 flex items-center gap-3">
-              <span className="h-px w-8 bg-gold" />
-              The Flourish Protocol
-            </motion.div>
-            <motion.h1
-              variants={fadeUp}
-              className="text-display text-[clamp(3rem,7.5vw,6.5rem)] text-ivory"
-            >
-              Premium <span className="italic text-champagne">Precision</span><br />
-              Performance <span className="text-gold">Formulae</span>
-            </motion.h1>
-            <motion.p
-              variants={fadeUp}
-              className="mt-8 max-w-md text-base leading-relaxed text-ivory/65"
-            >
-              Celestial is a precision-extracted performance system engineered for those who
-              refuse the average. Pharmaceutical-grade molecules. Scientifically dosed.
-              Quietly powerful.
-            </motion.p>
-            <motion.div variants={fadeUp} className="mt-10 flex items-center gap-8">
-              <button className="rounded-full bg-gold px-9 py-3.5 text-[11px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
-                Begin Protocol
-              </button>
-              <a href="#science" className="text-[11px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
-                The Science →
-              </a>
-            </motion.div>
-          </div>
+          <motion.div variants={fadeUp} className="text-eyebrow mb-4 flex items-center gap-3">
+            <span className="h-px w-8 bg-gold" />
+            The Flourish Protocol
+          </motion.div>
+          <motion.h1
+            variants={fadeUp}
+            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] text-ivory"
+          >
+            Premium <span className="italic text-champagne">Precision</span><br />
+            Performance <span className="text-gold">Formulae</span>
+          </motion.h1>
+          <motion.p
+            variants={fadeUp}
+            className="mt-6 max-w-md text-sm leading-relaxed text-ivory/70"
+          >
+            A precision-extracted performance system engineered for those who refuse the
+            average. Pharmaceutical-grade molecules. Scientifically dosed. Quietly powerful.
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-7 flex items-center gap-6">
+            <button className="rounded-full bg-gold px-7 py-3 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
+              Begin Protocol
+            </button>
+            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
+              The Science →
+            </a>
+          </motion.div>
 
-          <motion.div variants={fadeUp} className="relative lg:col-span-6">
-            <div
-              className="absolute -inset-2 rounded-[2rem]"
-              style={{ background: "var(--gradient-gold)", opacity: 0.18, filter: "blur(40px)" }}
-            />
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="relative overflow-hidden rounded-[2rem] border border-gold/20"
-              style={{ boxShadow: "var(--shadow-luxe)" }}
-            >
-              <img
-                src={heroFlatlay}
-                alt="Celestial luxury supplement bottles flat lay with gold leaf accents"
-                width={1600}
-                height={1280}
-                className="h-[68vh] w-full object-cover"
-              />
-            </motion.div>
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              className="absolute bottom-6 left-6 rounded-2xl border border-gold/30 bg-obsidian/80 p-4 backdrop-blur"
-            >
+          {/* Lot card pinned bottom-right, integrated not patched */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 1, ease }}
+            className="absolute bottom-24 right-8 hidden items-center gap-4 border-l border-gold/40 pl-5 md:flex"
+          >
+            <div>
               <div className="text-eyebrow mb-1 text-[9px]">Lot No.</div>
-              <div className="text-display text-xl text-ivory">CL · 2026 · 001</div>
-              <div className="mt-1 text-[9px] tracking-[0.2em] text-ivory/50">PURITY 99.97%</div>
-            </motion.div>
+              <div className="text-display text-lg text-ivory">CL · 2026 · 001</div>
+              <div className="mt-0.5 text-[9px] tracking-[0.25em] text-ivory/50">PURITY 99.97%</div>
+            </div>
             <motion.div
               animate={{ rotate: [0, 360] }}
               transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-              className="absolute -right-4 -top-4 hidden h-24 w-24 rounded-full border border-gold/40 md:block"
+              className="h-16 w-16"
             >
               <svg viewBox="0 0 100 100" className="h-full w-full">
                 <defs>
@@ -165,11 +170,11 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.3, duration: 1 }}
-          className="mt-20 flex flex-wrap items-center gap-x-12 gap-y-4 border-t border-border pt-8 text-[10px] uppercase tracking-[0.3em] text-ivory/40"
+          className="relative flex flex-wrap items-center gap-x-10 gap-y-3 border-t border-border/60 py-5 text-[10px] uppercase tracking-[0.3em] text-ivory/45"
         >
           <span>Featured in</span>
           {["Vogue", "GQ", "Forbes", "Wired", "Monocle"].map((b) => (
-            <span key={b} className="text-display text-base normal-case tracking-normal text-ivory/70">{b}</span>
+            <span key={b} className="text-display text-sm normal-case tracking-normal text-ivory/75">{b}</span>
           ))}
         </motion.div>
       </div>
