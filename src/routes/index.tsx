@@ -3,13 +3,15 @@ import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
 import heroFlatlay from "@/assets/hero-flatlay.jpg";
-const heroVideo = { url: "/__l5e/assets-v1/6566d8f9-5964-4021-9af0-b577dfa9ffd0/hero-video.mp4" };
 import banner1 from "@/assets/banner-product-1.jpg";
 import banner2 from "@/assets/banner-product-2.jpg";
 import productCapsule from "@/assets/product-capsule.jpg";
 import iconLeaf from "@/assets/icon-leaf.png";
 import iconMolecule from "@/assets/icon-molecule.png";
 import iconGem from "@/assets/icon-gem.png";
+
+const HERO_VIDEO_URL =
+  "/__l5e/assets-v1/6566d8f9-5964-4021-9af0-b577dfa9ffd0/hero-video.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
