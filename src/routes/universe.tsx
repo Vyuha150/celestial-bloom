@@ -30,8 +30,10 @@ const fadeUp = {
 };
 
 function UniversePage() {
+  const [quizOpen, setQuizOpen] = useState(false);
   return (
     <div className="min-h-screen bg-obsidian pt-32">
+      <StackQuiz open={quizOpen} onOpenChange={setQuizOpen} />
       <div className="mx-auto max-w-[1320px] px-8">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease }}>
           <Link to="/" className="text-eyebrow inline-flex items-center gap-2 hover:text-champagne">
