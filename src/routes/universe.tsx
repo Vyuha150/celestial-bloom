@@ -50,6 +50,13 @@ function UniversePage() {
                 Every Celestial SKU is engineered around a peer-reviewed clinical threshold,
                 housed in matte aluminium, and verified by an independent third-party lab.
               </p>
+              <button
+                onClick={() => setQuizOpen(true)}
+                className="group mt-8 inline-flex items-center gap-3 rounded-full bg-gold px-8 py-4 text-[10px] uppercase tracking-[0.3em] text-obsidian shadow-[0_8px_30px_rgba(212,175,55,0.25)] transition-all hover:bg-champagne hover:shadow-[0_12px_40px_rgba(212,175,55,0.4)]"
+              >
+                Customize your stack
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </button>
             </div>
             <div className="hidden text-right md:block">
               <div className="text-display text-6xl text-gold">{totalSkus}</div>
