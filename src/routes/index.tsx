@@ -154,9 +154,9 @@ function Hero() {
             <button className="rounded-full bg-gold px-7 py-3 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
               Begin Protocol
             </button>
-            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
+            <Link to="/science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
               The Science →
-            </a>
+            </Link>
           </motion.div>
 
           {/* Lot card pinned bottom-right, integrated not patched */}
