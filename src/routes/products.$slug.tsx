@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { categories, findCategory } from "@/data/products";
+import { categories, findCategory, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
 
 export const Route = createFileRoute("/products/$slug")({
@@ -43,7 +43,7 @@ const fadeUp = {
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
 
 function ProductPage() {
-  const { cat } = Route.useLoaderData();
+  const { cat } = Route.useLoaderData() as { cat: Category };
   const idx = categories.findIndex((c) => c.slug === cat.slug);
   const next = categories[(idx + 1) % categories.length];
   const maxBar = Math.max(...cat.infographic.bars.map((b) => b.value));
