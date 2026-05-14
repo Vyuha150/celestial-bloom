@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UniverseRouteImport } from './routes/universe'
 import { Route as ScienceRouteImport } from './routes/science'
+import { Route as ProtocolRouteImport } from './routes/protocol'
 import { Route as BrandNewRouteImport } from './routes/brand-new'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
@@ -24,6 +25,11 @@ const UniverseRoute = UniverseRouteImport.update({
 const ScienceRoute = ScienceRouteImport.update({
   id: '/science',
   path: '/science',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtocolRoute = ProtocolRouteImport.update({
+  id: '/protocol',
+  path: '/protocol',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandNewRoute = BrandNewRouteImport.update({
@@ -50,6 +56,7 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
   '/products/$slug': typeof ProductsSlugRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/brand-new'
+    | '/protocol'
     | '/science'
     | '/universe'
     | '/products/$slug'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/brand-new'
+    | '/protocol'
     | '/science'
     | '/universe'
     | '/products/$slug'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/brand-new'
+    | '/protocol'
     | '/science'
     | '/universe'
     | '/products/$slug'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrandNewRoute: typeof BrandNewRoute
+  ProtocolRoute: typeof ProtocolRoute
   ScienceRoute: typeof ScienceRoute
   UniverseRoute: typeof UniverseRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/science'
       fullPath: '/science'
       preLoaderRoute: typeof ScienceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protocol': {
+      id: '/protocol'
+      path: '/protocol'
+      fullPath: '/protocol'
+      preLoaderRoute: typeof ProtocolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brand-new': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrandNewRoute: BrandNewRoute,
+  ProtocolRoute: ProtocolRoute,
   ScienceRoute: ScienceRoute,
   UniverseRoute: UniverseRoute,
   ProductsSlugRoute: ProductsSlugRoute,
