@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { categories, totalSkus } from "@/data/products";
+import { StackQuiz } from "@/components/StackQuiz";
 
 export const Route = createFileRoute("/universe")({
   head: () => ({
