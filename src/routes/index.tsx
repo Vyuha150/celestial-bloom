@@ -52,6 +52,7 @@ function Nav() {
         </div>
         <nav className="hidden gap-10 text-[10.5px] tracking-[0.3em] uppercase text-ivory/70 md:flex">
           <a href="#science" className="transition-colors hover:text-gold">Science</a>
+          <Link to="/products" className="transition-colors hover:text-gold">Products</Link>
           <a href="#protocol" className="transition-colors hover:text-gold">Protocol</a>
           <Link to="/universe" className="transition-colors hover:text-gold">Universe</Link>
           <a href="#journal" className="transition-colors hover:text-gold">Journal</a>
