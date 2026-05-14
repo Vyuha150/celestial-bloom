@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { categories, totalSkus } from "@/data/products";
+import { StackQuiz } from "@/components/StackQuiz";
 
 export const Route = createFileRoute("/universe")({
   head: () => ({
@@ -28,8 +30,10 @@ const fadeUp = {
 };
 
 function UniversePage() {
+  const [quizOpen, setQuizOpen] = useState(false);
   return (
     <div className="min-h-screen bg-obsidian pt-32">
+      <StackQuiz open={quizOpen} onOpenChange={setQuizOpen} />
       <div className="mx-auto max-w-[1320px] px-8">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease }}>
           <Link to="/" className="text-eyebrow inline-flex items-center gap-2 hover:text-champagne">
@@ -46,6 +50,13 @@ function UniversePage() {
                 Every Celestial SKU is engineered around a peer-reviewed clinical threshold,
                 housed in matte aluminium, and verified by an independent third-party lab.
               </p>
+              <button
+                onClick={() => setQuizOpen(true)}
+                className="group mt-8 inline-flex items-center gap-3 rounded-full bg-gold px-8 py-4 text-[10px] uppercase tracking-[0.3em] text-obsidian shadow-[0_8px_30px_rgba(212,175,55,0.25)] transition-all hover:bg-champagne hover:shadow-[0_12px_40px_rgba(212,175,55,0.4)]"
+              >
+                Customize your stack
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </button>
             </div>
             <div className="hidden text-right md:block">
               <div className="text-display text-6xl text-gold">{totalSkus}</div>
