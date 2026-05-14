@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UniverseRouteImport } from './routes/universe'
 import { Route as ScienceRouteImport } from './routes/science'
 import { Route as ProtocolRouteImport } from './routes/protocol'
+import { Route as JournalRouteImport } from './routes/journal'
 import { Route as BrandNewRouteImport } from './routes/brand-new'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products.index'
@@ -30,6 +31,11 @@ const ScienceRoute = ScienceRouteImport.update({
 const ProtocolRoute = ProtocolRouteImport.update({
   id: '/protocol',
   path: '/protocol',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandNewRoute = BrandNewRouteImport.update({
@@ -56,6 +62,7 @@ const ProductsSlugRoute = ProductsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/journal': typeof JournalRoute
   '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/journal': typeof JournalRoute
   '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/brand-new': typeof BrandNewRoute
+  '/journal': typeof JournalRoute
   '/protocol': typeof ProtocolRoute
   '/science': typeof ScienceRoute
   '/universe': typeof UniverseRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/brand-new'
+    | '/journal'
     | '/protocol'
     | '/science'
     | '/universe'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/brand-new'
+    | '/journal'
     | '/protocol'
     | '/science'
     | '/universe'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/brand-new'
+    | '/journal'
     | '/protocol'
     | '/science'
     | '/universe'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrandNewRoute: typeof BrandNewRoute
+  JournalRoute: typeof JournalRoute
   ProtocolRoute: typeof ProtocolRoute
   ScienceRoute: typeof ScienceRoute
   UniverseRoute: typeof UniverseRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/protocol'
       fullPath: '/protocol'
       preLoaderRoute: typeof ProtocolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brand-new': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrandNewRoute: BrandNewRoute,
+  JournalRoute: JournalRoute,
   ProtocolRoute: ProtocolRoute,
   ScienceRoute: ScienceRoute,
   UniverseRoute: UniverseRoute,
