@@ -42,7 +42,8 @@ function ProductsIndex() {
           <nav className="hidden gap-10 text-[10.5px] tracking-[0.3em] uppercase text-ivory/70 md:flex">
             <Link to="/" hash="science" className="transition-colors hover:text-gold">Science</Link>
             <Link to="/products" className="text-gold">Products</Link>
-            <Link to="/universe" className="transition-colors hover:text-gold">Universe</Link>
+            <Link to="/brand-new" className="transition-colors hover:text-gold">Brand New</Link>
+            <Link to="/universe" className="transition-colors hover:text-gold">Customization</Link>
             <Link to="/" hash="protocol" className="transition-colors hover:text-gold">Protocol</Link>
           </nav>
           <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
