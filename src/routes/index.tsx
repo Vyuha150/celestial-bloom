@@ -1,3 +1,4 @@
+import { Shield as ShieldIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
@@ -57,6 +58,7 @@ function Nav() {
           <Link to="/protocol" className="transition-colors hover:text-gold">Protocol</Link>
           <Link to="/universe" className="transition-colors hover:text-gold">Customization</Link>
           <Link to="/journal" className="transition-colors hover:text-gold">Journal</Link>
+          <Link to="/admin" title="Admin Panel" aria-label="Admin Panel" className="inline-flex items-center gap-1 transition-colors hover:text-gold"><ShieldIcon className="h-3.5 w-3.5" /></Link>
         </nav>
         <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
           Enter
