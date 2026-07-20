@@ -99,7 +99,7 @@ function Hero() {
         className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 70%, transparent) 38%, color-mix(in oklab, var(--obsidian) 15%, transparent) 70%, transparent 100%)",
+            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 92%, transparent) 30%, color-mix(in oklab, var(--obsidian) 55%, transparent) 55%, color-mix(in oklab, var(--obsidian) 10%, transparent) 78%, transparent 100%)",
         }}
       />
       <div
