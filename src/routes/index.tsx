@@ -99,7 +99,7 @@ function Hero() {
         className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 70%, transparent) 38%, color-mix(in oklab, var(--obsidian) 15%, transparent) 70%, transparent 100%)",
+            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 92%, transparent) 30%, color-mix(in oklab, var(--obsidian) 55%, transparent) 55%, color-mix(in oklab, var(--obsidian) 10%, transparent) 78%, transparent 100%)",
         }}
       />
       <div
@@ -139,15 +139,16 @@ function Hero() {
           </motion.div>
           <motion.h1
             variants={fadeUp}
-            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] text-ivory drop-shadow-[0_2px_24px_rgba(0,0,0,0.65)]"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}
+            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] font-medium text-ivory"
+            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.5)" }}
           >
             Premium <span className="italic text-champagne">Precision</span><br />
             Performance <span className="text-gold">Formulae</span>
           </motion.h1>
           <motion.p
             variants={fadeUp}
-            className="mt-6 max-w-md text-sm leading-relaxed text-ivory/90 drop-shadow-[0_1px_10px_rgba(0,0,0,0.6)]"
+            className="mt-6 max-w-md text-base leading-relaxed text-ivory"
+            style={{ textShadow: "0 1px 14px rgba(0,0,0,0.85)" }}
           >
             A precision-extracted performance system engineered for those who refuse the
             average. Pharmaceutical-grade molecules. Scientifically dosed. Quietly powerful.
