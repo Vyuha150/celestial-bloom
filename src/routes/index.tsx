@@ -139,8 +139,12 @@ function Hero() {
           </motion.div>
           <motion.h1
             variants={fadeUp}
-            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] font-medium text-ivory"
-            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.5)" }}
+            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] font-semibold text-ivory"
+            style={{
+              color: "#FBF7EE",
+              textShadow:
+                "0 2px 30px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.9)",
+            }}
           >
             Premium <span className="italic text-champagne">Precision</span><br />
             Performance <span className="text-gold">Formulae</span>
