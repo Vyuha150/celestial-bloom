@@ -149,14 +149,14 @@ function Hero() {
           variants={stagger}
           className="relative flex flex-1 flex-col justify-center"
         >
-          {/* localized readability scrim behind copy */}
+          {/* localized readability scrim behind copy — density tracks video luminance */}
           <div
-            className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10"
+            className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10 transition-[background] duration-700 ease-out"
             style={{
-              background:
-                "radial-gradient(60% 70% at 25% 50%, color-mix(in oklab, var(--obsidian) 85%, transparent) 0%, transparent 75%)",
+              background: `radial-gradient(60% 70% at 25% 50%, color-mix(in oklab, var(--obsidian) ${(scrim * 100).toFixed(0)}%, transparent) 0%, transparent 75%)`,
             }}
           />
+
           <motion.div variants={fadeUp} className="text-eyebrow mb-4 flex items-center gap-3">
             <span className="h-px w-8 bg-gold" />
             The Flourish Protocol
