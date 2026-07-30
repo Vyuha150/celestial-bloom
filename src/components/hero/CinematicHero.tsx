@@ -11,41 +11,8 @@ const METRICS = [
 
 export function CinematicHero() {
   const stage = useRef<HTMLDivElement>(null);
-  const product = useRef<HTMLImageElement>(null);
   const cta = useMagnetic<HTMLAnchorElement>(0.22);
 
-  // Restrained cursor parallax — a few degrees at most.
-  useEffect(() => {
-    const el = stage.current;
-    if (!el || typeof window === "undefined") return;
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let raf = 0;
-    let tx = 0;
-    let ty = 0;
-    let cx = 0;
-    let cy = 0;
-
-    const onMove = (e: PointerEvent) => {
-      tx = (e.clientX / window.innerWidth - 0.5) * 2;
-      ty = (e.clientY / window.innerHeight - 0.5) * 2;
-    };
-    const loop = () => {
-      cx += (tx - cx) * 0.06;
-      cy += (ty - cy) * 0.06;
-      if (product.current) {
-        product.current.style.transform = `translate3d(${cx * 14}px, ${cy * 10}px, 0) rotateY(${cx * 4}deg) rotateX(${-cy * 3}deg)`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
 
   return (
     <section
