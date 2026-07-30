@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
 import { useMagnetic } from "@/components/site/CursorLayer";
-import serum from "@/assets/p-serum.png";
+import serum from "@/assets/m-luna-elixir.png.asset.json";
 
 const METRICS = [
   { k: "14-stage", v: "Molecular extraction" },
@@ -82,12 +82,12 @@ export function CinematicHero() {
       {/* Product — the visual anchor, in front of the word */}
       <img
         ref={product}
-        src={serum}
+        src={serum.url}
         alt="Celestial Molecular Renewal Serum in amber glass with dropper"
-        width={1024}
-        height={1408}
+        width={941}
+        height={1650}
         fetchPriority="high"
-        className="pointer-events-none absolute left-1/2 top-[46%] z-[2] h-[62svh] w-auto -translate-x-1/2 -translate-y-1/2 object-contain will-change-transform"
+        className="pointer-events-none absolute left-1/2 top-[46%] z-[2] h-[72svh] w-auto -translate-x-1/2 -translate-y-1/2 object-contain will-change-transform"
         style={{ filter: "drop-shadow(0 60px 80px rgba(0,0,0,0.75))" }}
       />
 
