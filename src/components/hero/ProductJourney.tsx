@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
-import serum from "@/assets/p-serum.png";
-import supplement from "@/assets/p-supplement.png";
-import essence from "@/assets/p-essence.png";
-import nutrition from "@/assets/p-nutrition.png";
+import serum from "@/assets/m-luna-elixir.png.asset.json";
+import supplement from "@/assets/m-luminosity.png.asset.json";
+import essence from "@/assets/m-balance.png.asset.json";
+import nutrition from "@/assets/m-ritual-greens.png.asset.json";
 
 type Scene = {
   word: string;
@@ -21,8 +21,8 @@ const SCENES: Scene[] = [
   {
     word: "COSMETICS",
     name: "Molecular Renewal Serum",
-    product: serum,
-    alt: "Amber glass dropper bottle of Celestial Molecular Renewal Serum",
+    product: serum.url,
+    alt: "Celestial Luna Elixir night recovery facial serum",
     metric: "Precision-active formulation",
     copy: "Cold-phase extraction holds the actives intact — potency you can measure on skin.",
     to: "/products/luxury-ready-to-consume",
@@ -31,8 +31,8 @@ const SCENES: Scene[] = [
   {
     word: "SUPPLEMENTS",
     name: "Cellular Vitality",
-    product: supplement,
-    alt: "Dark glass Celestial supplement bottle with antique gold cap",
+    product: supplement.url,
+    alt: "Celestial Luminosity skin radiance capsules",
     metric: "Measured potency. Refined delivery.",
     copy: "Liposomal architecture carries each compound past the barriers that blunt ordinary dosing.",
     to: "/products/core-performance-stack",
@@ -41,8 +41,8 @@ const SCENES: Scene[] = [
   {
     word: "ESSENCE",
     name: "Celestial Essence",
-    product: essence,
-    alt: "Faceted smoked crystal Celestial perfume flacon with gold cap",
+    product: essence.url,
+    alt: "Celestial Balance gentle cleanser",
     metric: "A sensory signature beyond convention",
     copy: "A structured accord of resin, iris and cold mineral air — composed, never perfumed.",
     to: "/products/luxury-ready-to-consume",
@@ -51,8 +51,8 @@ const SCENES: Scene[] = [
   {
     word: "NUTRITION",
     name: "Pure Origin",
-    product: nutrition,
-    alt: "Matte black Celestial nutrition jar with brushed gold lid",
+    product: nutrition.url,
+    alt: "Celestial Ritual Greens daily superfood",
     metric: "Origin preserved through precision",
     copy: "Single-origin inputs, traced lot to lot, reduced only by methods that keep them whole.",
     to: "/products/precision-powders",
@@ -214,16 +214,21 @@ export function ProductJourney() {
               </span>
             </div>
 
-            <div className="pointer-events-none absolute inset-x-0 top-[16%] z-[2] flex h-[58svh] justify-center">
+            <div className="pointer-events-none absolute inset-x-0 top-[10%] z-[2] flex h-[74svh] justify-center">
               <img
                 data-product
                 src={s.product}
                 alt={s.alt}
                 loading="lazy"
-                width={1024}
-                height={1408}
-                className="h-full w-auto object-contain will-change-transform"
-                style={{ filter: "drop-shadow(0 50px 70px rgba(0,0,0,0.8))" }}
+                width={941}
+                height={1650}
+                className="h-full w-auto object-contain mix-blend-screen will-change-transform"
+                style={{
+                  maskImage:
+                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
+                  WebkitMaskImage:
+                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
+                }}
               />
             </div>
 
