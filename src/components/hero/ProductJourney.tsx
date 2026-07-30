@@ -223,6 +223,12 @@ export function ProductJourney() {
                 width={941}
                 height={1650}
                 className="h-full w-auto object-contain mix-blend-screen will-change-transform"
+                style={{
+                  maskImage:
+                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
+                  WebkitMaskImage:
+                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
+                }}
               />
             </div>
 
