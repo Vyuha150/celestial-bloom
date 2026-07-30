@@ -131,32 +131,44 @@ function Hero() {
           initial="hidden"
           animate="show"
           variants={stagger}
-          className="flex flex-1 flex-col justify-center"
+          className="relative flex flex-1 flex-col justify-center"
         >
+          {/* localized readability scrim behind copy */}
+          <div
+            className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10"
+            style={{
+              background:
+                "radial-gradient(60% 70% at 25% 50%, color-mix(in oklab, var(--obsidian) 85%, transparent) 0%, transparent 75%)",
+            }}
+          />
           <motion.div variants={fadeUp} className="text-eyebrow mb-4 flex items-center gap-3">
             <span className="h-px w-8 bg-gold" />
             The Flourish Protocol
           </motion.div>
           <motion.h1
             variants={fadeUp}
-            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] font-semibold text-ivory"
+            className="text-display max-w-3xl text-[clamp(2.5rem,6vw,5.25rem)] font-semibold"
             style={{
-              color: "#FBF7EE",
+              color: "#FFFDF8",
               textShadow:
-                "0 2px 30px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.9)",
+                "0 2px 24px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,1)",
             }}
           >
-            Premium <span className="italic text-champagne">Precision</span><br />
-            Performance <span className="text-gold">Formulae</span>
+            Premium <span className="italic" style={{ color: "#F6E7C6" }}>Precision</span><br />
+            Performance <span style={{ color: "#F0C979" }}>Formulae</span>
           </motion.h1>
           <motion.p
             variants={fadeUp}
-            className="mt-6 max-w-md text-base leading-relaxed text-ivory"
-            style={{ textShadow: "0 1px 14px rgba(0,0,0,0.85)" }}
+            className="mt-6 max-w-md text-base font-normal leading-relaxed"
+            style={{
+              color: "#F4F0E6",
+              textShadow: "0 1px 10px rgba(0,0,0,0.95), 0 0 30px rgba(0,0,0,0.8)",
+            }}
           >
             A precision-extracted performance system engineered for those who refuse the
             average. Pharmaceutical-grade molecules. Scientifically dosed. Quietly powerful.
           </motion.p>
+
           <motion.div variants={fadeUp} className="mt-7 flex items-center gap-6">
             <button className="rounded-full bg-gold px-7 py-3 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
               Begin Protocol
