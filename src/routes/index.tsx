@@ -1,5 +1,8 @@
+import { useRef } from "react";
 import { Shield as ShieldIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useVideoLuminance } from "@/hooks/useVideoLuminance";
+
 import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
