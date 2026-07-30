@@ -128,3 +128,43 @@
   background: linear-gradient(90deg, transparent, var(--color-gold) 50%, transparent);
   opacity: 0.4;
 }
+
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(14px, -26px, 0) scale(1.35); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@utility animate-drift {
+  animation-name: drift;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+}
+
+@keyframes scrollcue {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+
+@utility animate-scrollcue {
+  animation: scrollcue 2.4s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift,
+  .animate-scrollcue {
+    animation: none !important;
+  }
+}
+
+@media (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 3px;
+}
