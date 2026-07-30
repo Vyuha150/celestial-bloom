@@ -112,12 +112,12 @@ function Hero() {
 
       {/* Cinematic overlays — sit ABOVE media but BELOW content */}
       <div
-        className="pointer-events-none absolute inset-0 z-[2]"
+        className="pointer-events-none absolute inset-0 z-[2] transition-[background] duration-700 ease-out"
         style={{
-          background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 92%, transparent) 30%, color-mix(in oklab, var(--obsidian) 55%, transparent) 55%, color-mix(in oklab, var(--obsidian) 10%, transparent) 78%, transparent 100%)",
+          background: `linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) ${(veil * 100).toFixed(0)}%, transparent) 30%, color-mix(in oklab, var(--obsidian) ${(veil * 62).toFixed(0)}%, transparent) 55%, color-mix(in oklab, var(--obsidian) ${(veil * 14).toFixed(0)}%, transparent) 78%, transparent 100%)`,
         }}
       />
+
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-56"
         style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
