@@ -69,6 +69,16 @@ function Nav() {
 }
 
 function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // Live luminance of the video area sitting behind the headline copy.
+  const luminance = useVideoLuminance(videoRef, {
+    region: { x: 0, y: 0.15, w: 0.4, h: 0.7 },
+    intervalMs: 220,
+  });
+  // Brighter frames -> denser scrim. Clamped so it never fully hides the video.
+  const scrim = Math.min(0.96, Math.max(0.5, 0.5 + luminance * 1.15));
+  const veil = Math.min(0.9, Math.max(0.55, 0.55 + luminance * 0.9));
+
   return (
     <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden bg-obsidian">
       {/* Full-bleed background still (lowest layer) */}
@@ -79,11 +89,13 @@ function Hero() {
       />
       {/* Cinematic luxury video, right-anchored, edge-blended */}
       <video
+        ref={videoRef}
         src={HERO_VIDEO_URL}
         autoPlay
         loop
         muted
         playsInline
+        crossOrigin="anonymous"
         preload="auto"
         poster={heroFlatlay}
         className="pointer-events-none absolute inset-y-0 right-0 z-[1] h-full w-full object-cover md:w-[72%]"
@@ -94,6 +106,7 @@ function Hero() {
             "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 22%, rgba(0,0,0,1) 50%)",
         }}
       />
+
       {/* Cinematic overlays — sit ABOVE media but BELOW content */}
       <div
         className="pointer-events-none absolute inset-0 z-[2]"
