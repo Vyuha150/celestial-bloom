@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
-import serum from "@/assets/m-luna-elixir.png.asset.json";
-import supplement from "@/assets/m-luminosity.png.asset.json";
-import essence from "@/assets/m-balance.png.asset.json";
-import nutrition from "@/assets/m-ritual-greens.png.asset.json";
+import serum from "@/assets/p-luna-elixir.png.asset.json";
+import supplement from "@/assets/p-luminosity.png.asset.json";
+import essence from "@/assets/p-balance.png.asset.json";
+import nutrition from "@/assets/p-ritual-greens.png.asset.json";
 
 type Scene = {
   word: string;
@@ -220,15 +220,10 @@ export function ProductJourney() {
                 src={s.product}
                 alt={s.alt}
                 loading="lazy"
-                width={941}
-                height={1650}
-                className="h-full w-auto object-contain mix-blend-screen will-change-transform"
-                style={{
-                  maskImage:
-                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
-                  WebkitMaskImage:
-                    "radial-gradient(75% 70% at 50% 50%, #000 55%, transparent 100%)",
-                }}
+                width={1024}
+                height={1536}
+                className="h-full w-auto object-contain will-change-transform"
+                style={{ filter: "drop-shadow(0 40px 70px rgba(0,0,0,0.7))" }}
               />
             </div>
 
