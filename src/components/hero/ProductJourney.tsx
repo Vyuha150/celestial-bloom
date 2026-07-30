@@ -222,8 +222,7 @@ export function ProductJourney() {
                 loading="lazy"
                 width={941}
                 height={1650}
-                className="h-full w-auto object-contain will-change-transform"
-                style={{ filter: "drop-shadow(0 50px 70px rgba(0,0,0,0.8))" }}
+                className="h-full w-auto object-contain mix-blend-screen will-change-transform"
               />
             </div>
 
