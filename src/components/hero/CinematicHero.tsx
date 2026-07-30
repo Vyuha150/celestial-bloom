@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
 import { useMagnetic } from "@/components/site/CursorLayer";
