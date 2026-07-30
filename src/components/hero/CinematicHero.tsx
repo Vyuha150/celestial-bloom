@@ -1,8 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
 import { useMagnetic } from "@/components/site/CursorLayer";
-import serum from "@/assets/p-luna-elixir.png.asset.json";
 
 const METRICS = [
   { k: "14-stage", v: "Molecular extraction" },
@@ -12,41 +11,8 @@ const METRICS = [
 
 export function CinematicHero() {
   const stage = useRef<HTMLDivElement>(null);
-  const product = useRef<HTMLImageElement>(null);
   const cta = useMagnetic<HTMLAnchorElement>(0.22);
 
-  // Restrained cursor parallax — a few degrees at most.
-  useEffect(() => {
-    const el = stage.current;
-    if (!el || typeof window === "undefined") return;
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let raf = 0;
-    let tx = 0;
-    let ty = 0;
-    let cx = 0;
-    let cy = 0;
-
-    const onMove = (e: PointerEvent) => {
-      tx = (e.clientX / window.innerWidth - 0.5) * 2;
-      ty = (e.clientY / window.innerHeight - 0.5) * 2;
-    };
-    const loop = () => {
-      cx += (tx - cx) * 0.06;
-      cy += (ty - cy) * 0.06;
-      if (product.current) {
-        product.current.style.transform = `translate3d(${cx * 14}px, ${cy * 10}px, 0) rotateY(${cx * 4}deg) rotateX(${-cy * 3}deg)`;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
 
   return (
     <section
@@ -79,17 +45,6 @@ export function CinematicHero() {
         CELESTIAL
       </h1>
 
-      {/* Product — the visual anchor, in front of the word */}
-      <img
-        ref={product}
-        src={serum.url}
-        alt="Celestial Molecular Renewal Serum in amber glass with dropper"
-        width={1024}
-        height={1536}
-        fetchPriority="high"
-        className="pointer-events-none absolute left-1/2 top-[46%] z-[2] h-[72svh] w-auto -translate-x-1/2 -translate-y-1/2 object-contain will-change-transform"
-        style={{ filter: "drop-shadow(0 40px 70px rgba(0,0,0,0.75))" }}
-      />
 
       {/* Floor reflection */}
       <div
