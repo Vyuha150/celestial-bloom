@@ -1,5 +1,8 @@
+import { useRef } from "react";
 import { Shield as ShieldIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useVideoLuminance } from "@/hooks/useVideoLuminance";
+
 import { categories, totalSkus } from "@/data/products";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
@@ -69,6 +72,16 @@ function Nav() {
 }
 
 function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // Live luminance of the video area sitting behind the headline copy.
+  const luminance = useVideoLuminance(videoRef, {
+    region: { x: 0, y: 0.15, w: 0.4, h: 0.7 },
+    intervalMs: 220,
+  });
+  // Brighter frames -> denser scrim. Clamped so it never fully hides the video.
+  const scrim = Math.min(0.96, Math.max(0.5, 0.5 + luminance * 1.15));
+  const veil = Math.min(0.9, Math.max(0.55, 0.55 + luminance * 0.9));
+
   return (
     <section className="relative flex h-screen min-h-[640px] flex-col overflow-hidden bg-obsidian">
       {/* Full-bleed background still (lowest layer) */}
@@ -79,11 +92,13 @@ function Hero() {
       />
       {/* Cinematic luxury video, right-anchored, edge-blended */}
       <video
+        ref={videoRef}
         src={HERO_VIDEO_URL}
         autoPlay
         loop
         muted
         playsInline
+        crossOrigin="anonymous"
         preload="auto"
         poster={heroFlatlay}
         className="pointer-events-none absolute inset-y-0 right-0 z-[1] h-full w-full object-cover md:w-[72%]"
@@ -94,14 +109,15 @@ function Hero() {
             "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.35) 22%, rgba(0,0,0,1) 50%)",
         }}
       />
+
       {/* Cinematic overlays — sit ABOVE media but BELOW content */}
       <div
-        className="pointer-events-none absolute inset-0 z-[2]"
+        className="pointer-events-none absolute inset-0 z-[2] transition-[background] duration-700 ease-out"
         style={{
-          background:
-            "linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) 92%, transparent) 30%, color-mix(in oklab, var(--obsidian) 55%, transparent) 55%, color-mix(in oklab, var(--obsidian) 10%, transparent) 78%, transparent 100%)",
+          background: `linear-gradient(to right, var(--obsidian) 0%, color-mix(in oklab, var(--obsidian) ${(veil * 100).toFixed(0)}%, transparent) 30%, color-mix(in oklab, var(--obsidian) ${(veil * 62).toFixed(0)}%, transparent) 55%, color-mix(in oklab, var(--obsidian) ${(veil * 14).toFixed(0)}%, transparent) 78%, transparent 100%)`,
         }}
       />
+
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-56"
         style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
@@ -133,14 +149,14 @@ function Hero() {
           variants={stagger}
           className="relative flex flex-1 flex-col justify-center"
         >
-          {/* localized readability scrim behind copy */}
+          {/* localized readability scrim behind copy — density tracks video luminance */}
           <div
-            className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10"
+            className="pointer-events-none absolute -inset-x-10 -inset-y-8 -z-10 transition-[background] duration-700 ease-out"
             style={{
-              background:
-                "radial-gradient(60% 70% at 25% 50%, color-mix(in oklab, var(--obsidian) 85%, transparent) 0%, transparent 75%)",
+              background: `radial-gradient(60% 70% at 25% 50%, color-mix(in oklab, var(--obsidian) ${(scrim * 100).toFixed(0)}%, transparent) 0%, transparent 75%)`,
             }}
           />
+
           <motion.div variants={fadeUp} className="text-eyebrow mb-4 flex items-center gap-3">
             <span className="h-px w-8 bg-gold" />
             The Flourish Protocol
