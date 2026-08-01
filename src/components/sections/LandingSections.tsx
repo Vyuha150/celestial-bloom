@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useMagnetic } from "@/components/site/CursorLayer";
 import { GoldParticles } from "@/components/site/GoldParticles";
+import { categories, totalSkus } from "@/data/products";
 import catCore from "@/assets/cat-core.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catPowders from "@/assets/cat-powders.jpg";
