@@ -42,11 +42,11 @@ function Index() {
       <main>
         <CinematicHero />
         <ProductJourney />
-        <ScienceOfElevation />
+        <FormulationsCatalogue />
         <CollectionsGrid />
         <MaterialAndFormula />
-        <FormulationsCatalogue />
         <FeaturedProduct />
+        <ScienceOfElevation />
       </main>
       <SiteFooter />
     </div>
