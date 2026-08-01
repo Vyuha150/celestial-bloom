@@ -45,7 +45,7 @@ function Index() {
         <ScienceOfElevation />
         <CollectionsGrid />
         <MaterialAndFormula />
-        <Manifesto />
+        <FormulationsCatalogue />
         <FeaturedProduct />
       </main>
       <SiteFooter />
