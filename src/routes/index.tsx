@@ -10,7 +10,7 @@ import {
   ScienceOfElevation,
   CollectionsGrid,
   MaterialAndFormula,
-  Manifesto,
+  FormulationsCatalogue,
   FeaturedProduct,
 } from "@/components/sections/LandingSections";
 
