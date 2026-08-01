@@ -10,7 +10,7 @@ import {
   ScienceOfElevation,
   CollectionsGrid,
   MaterialAndFormula,
-  Manifesto,
+  FormulationsCatalogue,
   FeaturedProduct,
 } from "@/components/sections/LandingSections";
 
@@ -45,7 +45,7 @@ function Index() {
         <ScienceOfElevation />
         <CollectionsGrid />
         <MaterialAndFormula />
-        <Manifesto />
+        <FormulationsCatalogue />
         <FeaturedProduct />
       </main>
       <SiteFooter />

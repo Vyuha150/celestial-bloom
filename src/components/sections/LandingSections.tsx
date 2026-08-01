@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useMagnetic } from "@/components/site/CursorLayer";
 import { GoldParticles } from "@/components/site/GoldParticles";
+import { categories, totalSkus } from "@/data/products";
 import catCore from "@/assets/cat-core.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catPowders from "@/assets/cat-powders.jpg";
@@ -249,6 +250,84 @@ export function MaterialAndFormula() {
             ))}
           </dl>
         </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------- Formulations grid */
+
+export function FormulationsCatalogue() {
+  return (
+    <section className="bg-obsidian py-24 md:py-32" aria-labelledby="formulations-title">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-10">
+        <motion.div
+          variants={rise}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          className="flex flex-col justify-between gap-8 md:flex-row md:items-end"
+        >
+          <h2
+            id="formulations-title"
+            className="max-w-xl text-display text-4xl leading-[1.12] text-ivory md:text-5xl"
+          >
+            {totalSkus} formulations.{" "}
+            <span className="italic text-gold">One operating system</span> for the body.
+          </h2>
+          <div className="text-right">
+            <p className="text-display text-4xl italic text-gold">{totalSkus}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.3em] text-ivory/40">Active SKUs</p>
+          </div>
+        </motion.div>
+
+        <div className="mt-10 grid border-t border-gold/12 md:grid-cols-2 lg:grid-cols-3">
+          {categories.map((c, i) => (
+            <motion.article
+              key={c.slug}
+              variants={rise}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ delay: (i % 3) * 0.07 }}
+              className="group border-b border-r border-gold/12"
+            >
+              <Link to="/products/$slug" params={{ slug: c.slug }} data-cursor="Explore" className="block h-full">
+                <div className="relative h-44 overflow-hidden md:h-52">
+                  <img
+                    src={c.image}
+                    alt={c.title}
+                    loading="lazy"
+                    className="absolute inset-0 h-full w-full scale-105 object-cover opacity-60 transition-all duration-[1400ms] ease-out group-hover:scale-100 group-hover:opacity-85"
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{ background: "linear-gradient(to top, var(--obsidian) 4%, transparent 70%)" }}
+                  />
+                </div>
+                <div className="p-6 transition-colors duration-700 group-hover:bg-midnight/40">
+                  <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.3em]">
+                    <span className="text-gold/80">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-ivory/35">{String(c.items.length).padStart(2, "0")} SKU</span>
+                  </div>
+                  <h3 className="mt-5 text-display text-xl text-champagne">{c.title}</h3>
+                  <ul className="mt-4 space-y-1.5">
+                    {c.items.slice(0, 4).map((it) => (
+                      <li key={it} className="flex gap-2 text-[11px] leading-relaxed text-ivory/50">
+                        <span className="text-gold/50">—</span>
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="mt-6 inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] text-gold transition-all group-hover:gap-4">
+                    Explore range →
+                  </span>
+                </div>
+              </Link>
+            </motion.article>
+          ))}
+        </div>
       </div>
     </section>
   );
