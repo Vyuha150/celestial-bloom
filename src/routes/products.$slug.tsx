@@ -59,7 +59,7 @@ function ProductHero({
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
   // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
-  const rotateY = useTransform(sx, [-1, 1], [-24, 24]);
+  const rotateY = useTransform(sx, [-1, 1], [-38, 38]);
   const y = useTransform(sx, [-1, 0, 1], [6, 0, 6]);
   const glowBg = useTransform(
     sx,
@@ -144,14 +144,23 @@ function ProductHero({
               className="absolute -inset-8 rounded-[3rem]"
               style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
             />
-            <img
-              src={cat.image}
-              alt={cat.title}
-              width={1024}
-              height={1024}
-              className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
-              style={{ boxShadow: "var(--shadow-gold)" }}
-            />
+            {cat.heroImage ? (
+              <img
+                src={cat.heroImage}
+                alt={cat.title}
+                className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain"
+                style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 50px color-mix(in oklab, var(--gold) 18%, transparent))" }}
+              />
+            ) : (
+              <img
+                src={cat.image}
+                alt={cat.title}
+                width={1024}
+                height={1024}
+                className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
+                style={{ boxShadow: "var(--shadow-gold)" }}
+              />
+            )}
             </motion.div>
           </div>
         </div>
