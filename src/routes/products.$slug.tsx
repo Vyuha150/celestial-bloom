@@ -43,11 +43,176 @@ const fadeUp = {
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
 
+function ProductHero({
+  cat,
+  idx,
+  prev,
+  next,
+}: {
+  cat: Category;
+  idx: number;
+  prev: Category;
+  next: Category;
+}) {
+  const stage = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 90, damping: 20, mass: 0.6 });
+  const sy = useSpring(my, { stiffness: 90, damping: 22, mass: 0.6 });
+  const x = useTransform(sx, (v) => v * 90);
+  const rotate = useTransform(sx, (v) => v * 6);
+  const y = useTransform(sy, (v) => v * 14);
+  const glowX = useTransform(sx, (v) => `${50 + v * 12}%`);
+
+  const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = stage.current?.getBoundingClientRect();
+    if (!r) return;
+    mx.set(Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2))));
+    my.set(Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2))));
+  };
+  const reset = () => {
+    mx.set(0);
+    my.set(0);
+  };
+
+  return (
+    <section className="relative overflow-hidden pt-32 pb-24">
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: useTransform(
+            glowX,
+            (gx) =>
+              `radial-gradient(55% 50% at ${gx} 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
+          ),
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48"
+        style={{ background: "linear-gradient(to bottom, transparent, var(--obsidian))" }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-[1320px] px-8">
+        <motion.div initial="hidden" animate="show" variants={stagger} className="text-center">
+          <motion.div variants={fadeUp}>
+            <Link to="/products" className="text-eyebrow inline-flex items-center gap-2 hover:text-champagne">
+              ← All products
+            </Link>
+          </motion.div>
+          <motion.div variants={fadeUp} className="text-eyebrow mt-5 flex items-center justify-center gap-3">
+            <span className="h-px w-8 bg-gold" /> {cat.hero.eyebrow}
+          </motion.div>
+        </motion.div>
+
+        {/* Cursor-reactive stage */}
+        <div
+          ref={stage}
+          onPointerMove={onMove}
+          onPointerLeave={reset}
+          className="relative mt-10 flex items-center justify-center"
+        >
+          {/* Arrows */}
+          <Link
+            to="/products/$slug"
+            params={{ slug: prev.slug }}
+            aria-label={`Previous category: ${prev.title}`}
+            className="group absolute left-0 z-20 flex items-center gap-3 text-ivory/60 transition-colors hover:text-gold"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/30 transition-all duration-500 group-hover:-translate-x-1 group-hover:border-gold">
+              <ChevronLeft className="h-4 w-4" />
+            </span>
+            <span className="hidden text-[10px] uppercase tracking-[0.3em] lg:inline">{prev.title}</span>
+          </Link>
+          <Link
+            to="/products/$slug"
+            params={{ slug: next.slug }}
+            aria-label={`Next category: ${next.title}`}
+            className="group absolute right-0 z-20 flex items-center gap-3 text-ivory/60 transition-colors hover:text-gold"
+          >
+            <span className="hidden text-[10px] uppercase tracking-[0.3em] lg:inline">{next.title}</span>
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/30 transition-all duration-500 group-hover:translate-x-1 group-hover:border-gold">
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          </Link>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.1, ease }}
+            style={{ x, y, rotate }}
+            className="relative w-[min(560px,72vw)] will-change-transform"
+          >
+            <div
+              aria-hidden
+              className="absolute -inset-8 rounded-[3rem]"
+              style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
+            />
+            <img
+              src={cat.image}
+              alt={cat.title}
+              width={1024}
+              height={1024}
+              className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
+              style={{ boxShadow: "var(--shadow-gold)" }}
+            />
+          </motion.div>
+        </div>
+
+        {/* Stable description */}
+        <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-3xl text-center">
+          <motion.h1
+            variants={fadeUp}
+            className="text-display text-[clamp(2.2rem,5vw,4.25rem)] leading-[1.06] text-ivory"
+            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}
+          >
+            {cat.hero.headline} <span className="italic text-gold">{cat.hero.italic}</span>
+          </motion.h1>
+          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ivory/80">
+            {cat.hero.pitch}
+          </motion.p>
+          <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <a href="#allocate" className="rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
+              Reserve allocation →
+            </a>
+            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
+              See the science
+            </a>
+            <span className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] text-gold">
+              {cat.hero.badge}
+            </span>
+          </motion.div>
+          <motion.div variants={fadeUp} className="mt-5 text-[9px] tracking-[0.3em] text-ivory/40 uppercase">
+            Lot CL · 2026 · {String(idx + 1).padStart(3, "0")} — {cat.items.length} SKU in range
+          </motion.div>
+        </motion.div>
+
+        {/* Stats strip */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4"
+        >
+          {cat.stats.map((s) => (
+            <div key={s.label} className="bg-obsidian p-5 text-center">
+              <div className="text-display text-3xl text-gold">{s.value}</div>
+              <div className="mt-1.5 text-[10px] uppercase tracking-[0.3em] text-ivory/50">{s.label}</div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 function ProductPage() {
   const { cat } = Route.useLoaderData() as { cat: Category };
   const idx = categories.findIndex((c) => c.slug === cat.slug);
   const next = categories[(idx + 1) % categories.length];
+  const prev = categories[(idx - 1 + categories.length) % categories.length];
   const maxBar = Math.max(...cat.infographic.bars.map((b) => b.value));
+
 
   return (
     <div className="min-h-screen bg-obsidian">
