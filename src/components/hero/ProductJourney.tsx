@@ -241,14 +241,22 @@ export function ProductJourney() {
                   </p>
                 </div>
                 <div className="overflow-hidden">
-                  <Link
-                    data-reveal
-                    to={s.to}
-                    data-cursor="View"
-                    className="mt-5 inline-block border-b border-gold/50 pb-1 text-[10px] uppercase tracking-[0.3em] text-gold"
-                  >
-                    View the formula
-                  </Link>
+                  <div data-reveal className="mt-5 flex flex-wrap items-center gap-5">
+                    <Link
+                      to={s.to}
+                      data-cursor="View"
+                      className="inline-block border-b border-gold/50 pb-1 text-[10px] uppercase tracking-[0.3em] text-gold"
+                    >
+                      View the formula
+                    </Link>
+                    <Link
+                      to={s.to}
+                      data-cursor="Purchase"
+                      className="inline-block bg-champagne px-6 py-2.5 text-[10px] uppercase tracking-[0.3em] text-obsidian transition-opacity duration-500 hover:opacity-85"
+                    >
+                      Purchase
+                    </Link>
+                  </div>
                 </div>
               </div>
               <div className="hidden max-w-[220px] text-right md:block">
