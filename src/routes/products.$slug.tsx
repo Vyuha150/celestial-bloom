@@ -131,13 +131,14 @@ function ProductHero({
             </span>
           </Link>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.1, ease }}
-            style={{ x, y, rotate }}
-            className="relative w-[min(560px,72vw)] will-change-transform"
-          >
+          <div style={{ perspective: 1400 }} className="flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.1, ease }}
+              style={{ rotateY, y, transformStyle: "preserve-3d" }}
+              className="relative w-[min(560px,72vw)] will-change-transform"
+            >
             <div
               aria-hidden
               className="absolute -inset-8 rounded-[3rem]"
