@@ -71,11 +71,9 @@ function ProductHero({
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
     mx.set(Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2))));
-    my.set(Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2))));
   };
   const reset = () => {
     mx.set(0);
-    my.set(0);
   };
 
   return (
