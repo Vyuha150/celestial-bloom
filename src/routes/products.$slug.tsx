@@ -1,6 +1,7 @@
-import { Shield as ShieldIcon } from "lucide-react";
+import { useRef } from "react";
+import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
 
@@ -62,7 +63,11 @@ function ProductHero({
   const x = useTransform(sx, (v) => v * 90);
   const rotate = useTransform(sx, (v) => v * 6);
   const y = useTransform(sy, (v) => v * 14);
-  const glowX = useTransform(sx, (v) => `${50 + v * 12}%`);
+  const glowBg = useTransform(
+    sx,
+    (v) =>
+      `radial-gradient(55% 50% at ${50 + v * 12}% 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
+  );
 
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = stage.current?.getBoundingClientRect();
@@ -80,13 +85,7 @@ function ProductHero({
       <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          background: useTransform(
-            glowX,
-            (gx) =>
-              `radial-gradient(55% 50% at ${gx} 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
-          ),
-        }}
+        style={{ background: glowBg }}
       />
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-48"
