@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SmoothScroll } from "@/components/site/SmoothScroll";
 import { CursorLayer } from "@/components/site/CursorLayer";
-import { CinematicHero } from "@/components/hero/CinematicHero";
+
 import { ProductJourney } from "@/components/hero/ProductJourney";
 import {
   ScienceOfElevation,
@@ -40,7 +40,6 @@ function Index() {
       <CursorLayer />
       <SiteHeader />
       <main>
-        <CinematicHero />
         <ProductJourney />
         <FormulationsCatalogue />
         <CollectionsGrid />
