@@ -152,7 +152,8 @@ function ProductHero({
               className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
               style={{ boxShadow: "var(--shadow-gold)" }}
             />
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         {/* Stable description */}
