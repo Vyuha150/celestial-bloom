@@ -40,7 +40,6 @@ function Index() {
       <CursorLayer />
       <SiteHeader />
       <main>
-        <CinematicHero />
         <ProductJourney />
         <FormulationsCatalogue />
         <CollectionsGrid />
