@@ -57,12 +57,10 @@ function ProductHero({
 }) {
   const stage = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 90, damping: 20, mass: 0.6 });
-  const sy = useSpring(my, { stiffness: 90, damping: 22, mass: 0.6 });
-  const x = useTransform(sx, (v) => v * 90);
-  const rotate = useTransform(sx, (v) => v * 6);
-  const y = useTransform(sy, (v) => v * 14);
+  const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
+  // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
+  const rotateY = useTransform(sx, [-1, 1], [-24, 24]);
+  const y = useTransform(sx, [-1, 0, 1], [6, 0, 6]);
   const glowBg = useTransform(
     sx,
     (v) =>
