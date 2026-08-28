@@ -57,12 +57,10 @@ function ProductHero({
 }) {
   const stage = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 90, damping: 20, mass: 0.6 });
-  const sy = useSpring(my, { stiffness: 90, damping: 22, mass: 0.6 });
-  const x = useTransform(sx, (v) => v * 90);
-  const rotate = useTransform(sx, (v) => v * 6);
-  const y = useTransform(sy, (v) => v * 14);
+  const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
+  // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
+  const rotateY = useTransform(sx, [-1, 1], [-24, 24]);
+  const y = useTransform(sx, [-1, 0, 1], [6, 0, 6]);
   const glowBg = useTransform(
     sx,
     (v) =>
@@ -73,11 +71,9 @@ function ProductHero({
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
     mx.set(Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2))));
-    my.set(Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2))));
   };
   const reset = () => {
     mx.set(0);
-    my.set(0);
   };
 
   return (
@@ -135,13 +131,14 @@ function ProductHero({
             </span>
           </Link>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.1, ease }}
-            style={{ x, y, rotate }}
-            className="relative w-[min(560px,72vw)] will-change-transform"
-          >
+          <div style={{ perspective: 1400 }} className="flex items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.1, ease }}
+              style={{ rotateY, y, transformStyle: "preserve-3d" }}
+              className="relative w-[min(560px,72vw)] will-change-transform"
+            >
             <div
               aria-hidden
               className="absolute -inset-8 rounded-[3rem]"
@@ -155,7 +152,8 @@ function ProductHero({
               className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
               style={{ boxShadow: "var(--shadow-gold)" }}
             />
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
 
         {/* Stable description */}
