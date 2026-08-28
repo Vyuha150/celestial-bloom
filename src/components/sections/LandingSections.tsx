@@ -397,7 +397,8 @@ export function FeaturedProduct() {
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
           <Link
             ref={cta}
-            to="/products/luxury-ready-to-consume"
+            to="/products/$slug"
+            params={{ slug: "luxury-ready-to-consume" }}
             data-cursor="Discover"
             className="border border-gold/60 px-8 py-3.5 text-[10px] uppercase tracking-[0.3em] text-gold transition-colors duration-500 hover:bg-gold hover:text-obsidian"
           >
