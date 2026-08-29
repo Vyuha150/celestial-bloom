@@ -219,6 +219,14 @@ function ProductHero({
           </div>
         </div>
 
+        {cat.heroVideo && (
+          <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
+            <ChevronLeft className="h-3 w-3 animate-pulse" />
+            Move cursor to rotate
+            <ChevronRight className="h-3 w-3 animate-pulse" />
+          </div>
+        )}
+
         {/* Stable description */}
         <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-3xl text-center">
           <motion.h1
