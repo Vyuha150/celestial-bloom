@@ -71,17 +71,21 @@ function ProductHero({
       `radial-gradient(55% 50% at ${50 + v * 12}% 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
   );
 
-  // Cursor-scrubbed 360° turntable: horizontal position targets a point in the
-  // rotation video, eased every frame for a glitch-free spin.
+  // Drive the turntable video manually: ease the spin rate toward the cursor
+  // target, advance time per frame, and wrap seamlessly. No play()/seek churn.
   useEffect(() => {
     if (!cat.heroVideo) return;
-    const s = scrub.current;
-    const loop = () => {
+    const s = spin.current;
+    const loop = (ts: number) => {
       const v = videoRef.current;
+      const dt = s.last ? Math.min(0.05, (ts - s.last) / 1000) : 0;
+      s.last = ts;
       if (v && v.duration) {
-        s.current += (s.target - s.current) * 0.09;
-        const t = s.current * v.duration;
-        if (Math.abs(v.currentTime - t) > 0.02) v.currentTime = t;
+        if (!v.paused) v.pause();
+        s.rate += (s.targetRate - s.rate) * 0.08;
+        s.time = (((s.time + s.rate * dt) % 1) + 1) % 1;
+        const t = s.time * v.duration;
+        if (Math.abs(v.currentTime - t) > 0.03) v.currentTime = t;
       }
       s.raf = requestAnimationFrame(loop);
     };
@@ -89,16 +93,17 @@ function ProductHero({
     return () => cancelAnimationFrame(s.raf);
   }, [cat.heroVideo]);
 
-  const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onMove = (e: React.PointerEvent<HTMLElement>) => {
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
     const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
     mx.set(nx);
-    scrub.current.target = (nx + 1) / 2;
+    // Left of centre spins backward, right spins forward; ~1.6s per revolution at edges.
+    spin.current.targetRate = nx * 0.65;
   };
   const reset = () => {
     mx.set(0);
-    scrub.current.target = 0.5;
+    spin.current.targetRate = 0;
   };
 
   return (
