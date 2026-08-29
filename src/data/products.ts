@@ -6,7 +6,7 @@ import catGummies from "@/assets/cat-gummies.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catDiagnostic from "@/assets/cat-diagnostic.jpg";
 import ritualGreensHero from "@/assets/p-ritual-greens-hero.png.asset.json";
-import ritualGreensRotate from "@/assets/ritual-greens-rotate.mp4.asset.json";
+import ritualGreensRotate from "@/assets/ritual-greens-rotate.webm.asset.json";
 
 export type Stat = { value: string; label: string };
 export type Benefit = { icon: string; title: string; body: string };
