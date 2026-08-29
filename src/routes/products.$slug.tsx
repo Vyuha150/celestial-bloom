@@ -175,7 +175,7 @@ function ProductHero({
                 playsInline
                 preload="auto"
                 aria-label={`${cat.title} — 360° view`}
-                className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain mix-blend-screen invert"
+                className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain mix-blend-multiply"
                 style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 50px color-mix(in oklab, var(--gold) 18%, transparent))" }}
               />
             ) : cat.heroImage ? (
