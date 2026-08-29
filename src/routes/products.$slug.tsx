@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
@@ -56,6 +56,8 @@ function ProductHero({
   next: Category;
 }) {
   const stage = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const scrub = useRef({ target: 0.5, current: 0.5, raf: 0 });
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
   // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
@@ -67,13 +69,34 @@ function ProductHero({
       `radial-gradient(55% 50% at ${50 + v * 12}% 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
   );
 
+  // Cursor-scrubbed 360° turntable: horizontal position targets a point in the
+  // rotation video, eased every frame for a glitch-free spin.
+  useEffect(() => {
+    if (!cat.heroVideo) return;
+    const s = scrub.current;
+    const loop = () => {
+      const v = videoRef.current;
+      if (v && v.duration) {
+        s.current += (s.target - s.current) * 0.09;
+        const t = s.current * v.duration;
+        if (Math.abs(v.currentTime - t) > 0.02) v.currentTime = t;
+      }
+      s.raf = requestAnimationFrame(loop);
+    };
+    s.raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(s.raf);
+  }, [cat.heroVideo]);
+
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
-    mx.set(Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2))));
+    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+    mx.set(nx);
+    scrub.current.target = (nx + 1) / 2;
   };
   const reset = () => {
     mx.set(0);
+    scrub.current.target = 0.5;
   };
 
   return (
@@ -136,7 +159,7 @@ function ProductHero({
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
-              style={{ rotateY, y, transformStyle: "preserve-3d" }}
+              style={cat.heroVideo ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
               className="relative w-[min(560px,72vw)] will-change-transform"
             >
             <div
@@ -144,7 +167,30 @@ function ProductHero({
               className="absolute -inset-8 rounded-[3rem]"
               style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
             />
-            {cat.heroImage ? (
+            {cat.heroVideo ? (
+              <div className="relative mx-auto flex h-[min(560px,64vh)] aspect-square items-center justify-center">
+                {/* Ivory medallion — the video's white studio sweep multiplies away into it */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-full border border-gold/25"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 38% 32%, color-mix(in oklab, var(--ivory) 97%, transparent) 0%, color-mix(in oklab, var(--champagne) 88%, transparent) 58%, color-mix(in oklab, var(--gold) 62%, transparent) 100%)",
+                    boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 60px color-mix(in oklab, var(--gold) 22%, transparent)",
+                  }}
+                />
+                <div aria-hidden className="absolute -inset-3 rounded-full border border-gold/15" />
+                <video
+                  ref={videoRef}
+                  src={cat.heroVideo}
+                  muted
+                  playsInline
+                  preload="auto"
+                  aria-label={`${cat.title} — 360° view`}
+                  className="relative h-[92%] w-[92%] rounded-full object-cover mix-blend-multiply"
+                />
+              </div>
+            ) : cat.heroImage ? (
               <img
                 src={cat.heroImage}
                 alt={cat.title}
