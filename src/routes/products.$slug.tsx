@@ -195,7 +195,7 @@ function ProductHero({
                   playsInline
                   preload="auto"
                   aria-label={`${cat.title} — 360° view`}
-                  className="relative h-[92%] w-[92%] rounded-full object-cover mix-blend-multiply"
+                  className="relative h-[92%] w-[92%] -translate-x-[2.5%] scale-[1.06] rounded-full object-cover mix-blend-multiply"
                 />
               </div>
             ) : cat.heroImage ? (
