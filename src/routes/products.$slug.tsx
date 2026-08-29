@@ -168,16 +168,28 @@ function ProductHero({
               style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
             />
             {cat.heroVideo ? (
-              <video
-                ref={videoRef}
-                src={cat.heroVideo}
-                muted
-                playsInline
-                preload="auto"
-                aria-label={`${cat.title} — 360° view`}
-                className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain mix-blend-multiply"
-                style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 50px color-mix(in oklab, var(--gold) 18%, transparent))" }}
-              />
+              <div className="relative mx-auto flex h-[min(560px,64vh)] aspect-square items-center justify-center">
+                {/* Ivory medallion — the video's white studio sweep multiplies away into it */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 rounded-full border border-gold/25"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 38% 32%, color-mix(in oklab, var(--ivory) 97%, transparent) 0%, color-mix(in oklab, var(--champagne) 88%, transparent) 58%, color-mix(in oklab, var(--gold) 62%, transparent) 100%)",
+                    boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 60px color-mix(in oklab, var(--gold) 22%, transparent)",
+                  }}
+                />
+                <div aria-hidden className="absolute -inset-3 rounded-full border border-gold/15" />
+                <video
+                  ref={videoRef}
+                  src={cat.heroVideo}
+                  muted
+                  playsInline
+                  preload="auto"
+                  aria-label={`${cat.title} — 360° view`}
+                  className="relative h-[92%] w-[92%] rounded-full object-cover mix-blend-multiply"
+                />
+              </div>
             ) : cat.heroImage ? (
               <img
                 src={cat.heroImage}
