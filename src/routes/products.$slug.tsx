@@ -55,9 +55,11 @@ function ProductHero({
   prev: Category;
   next: Category;
 }) {
-  const stage = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const scrub = useRef({ target: 0.5, current: 0.5, raf: 0 });
+  // Velocity-driven turntable: cursor X sets spin rate, time advances each
+  // frame — no seeking jitter, wrap-around is seamless on a 360° video.
+  const spin = useRef({ rate: 0, targetRate: 0, time: 0, raf: 0, last: 0 });
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
   // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
