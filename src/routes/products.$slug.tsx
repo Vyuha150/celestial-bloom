@@ -137,12 +137,7 @@ function ProductHero({
         </motion.div>
 
         {/* Cursor-reactive stage */}
-        <div
-          ref={stage}
-          onPointerMove={onMove}
-          onPointerLeave={reset}
-          className="relative mt-10 flex items-center justify-center"
-        >
+        <div className="relative mt-10 flex items-center justify-center">
           {/* Arrows */}
           <Link
             to="/products/$slug"
