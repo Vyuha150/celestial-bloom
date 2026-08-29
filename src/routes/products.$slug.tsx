@@ -107,7 +107,13 @@ function ProductHero({
   };
 
   return (
-    <section className="relative overflow-hidden pt-32 pb-24">
+    <section
+      ref={stage}
+      onPointerMove={onMove}
+      onPointerLeave={reset}
+      className="relative overflow-hidden pt-32 pb-24"
+      style={{ cursor: "ew-resize" }}
+    >
       <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
