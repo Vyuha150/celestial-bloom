@@ -6,7 +6,7 @@ import catGummies from "@/assets/cat-gummies.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catDiagnostic from "@/assets/cat-diagnostic.jpg";
 import ritualGreensHero from "@/assets/p-ritual-greens-hero.png.asset.json";
-import ritualGreensRotate from "@/assets/ritual-greens-rotate.webm.asset.json";
+import ritualGreensSprite from "@/assets/ritual-greens-turntable.webp.asset.json";
 
 export type Stat = { value: string; label: string };
 export type Benefit = { icon: string; title: string; body: string };
@@ -27,8 +27,8 @@ export type Category = {
   image: string;
   // Optional transparent product render used in the rotating hero stage
   heroImage?: string;
-  // Optional 360° turntable video scrubbed by cursor position in the hero
-  heroVideo?: string;
+  // Optional 360° turntable sprite sheet (transparent frames) driven by cursor / drag
+  heroSprite?: { url: string; frames: number; cols: number; rows: number; aspect: number };
   items: string[];
   // Sales-first content
   hero: {
@@ -72,7 +72,7 @@ export const categories: Category[] = [
     tagline: "The daily operating system. Foundational molecules for the elite human.",
     image: catCore,
     heroImage: ritualGreensHero.url,
-    heroVideo: ritualGreensRotate.url,
+    heroSprite: { url: ritualGreensSprite.url, frames: 48, cols: 8, rows: 6, aspect: 280 / 438 },
     items: [
       "Precision greens complex (v.12+)",
       "Complete amino acid matrix",

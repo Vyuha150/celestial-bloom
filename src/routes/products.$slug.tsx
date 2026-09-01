@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
+import { Turntable } from "@/components/product/Turntable";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: ({ params }) => {
@@ -56,10 +57,6 @@ function ProductHero({
   next: Category;
 }) {
   const stage = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  // Velocity-driven turntable: cursor X sets spin rate, time advances each
-  // frame — no seeking jitter, wrap-around is seamless on a 360° video.
-  const spin = useRef({ rate: 0, targetRate: 0, time: 0, raf: 0, last: 0 });
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
   // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
@@ -71,40 +68,13 @@ function ProductHero({
       `radial-gradient(55% 50% at ${50 + v * 12}% 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
   );
 
-  // Drive the turntable video manually: ease the spin rate toward the cursor
-  // target, advance time per frame, and wrap seamlessly. No play()/seek churn.
-  useEffect(() => {
-    if (!cat.heroVideo) return;
-    const s = spin.current;
-    const loop = (ts: number) => {
-      const v = videoRef.current;
-      const dt = s.last ? Math.min(0.05, (ts - s.last) / 1000) : 0;
-      s.last = ts;
-      if (v && v.duration) {
-        if (!v.paused) v.pause();
-        s.rate += (s.targetRate - s.rate) * 0.08;
-        s.time = (((s.time + s.rate * dt) % 1) + 1) % 1;
-        const t = s.time * v.duration;
-        if (Math.abs(v.currentTime - t) > 0.03) v.currentTime = t;
-      }
-      s.raf = requestAnimationFrame(loop);
-    };
-    s.raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(s.raf);
-  }, [cat.heroVideo]);
-
   const onMove = (e: React.PointerEvent<HTMLElement>) => {
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
     const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
     mx.set(nx);
-    // Left of centre spins backward, right spins forward; ~1.6s per revolution at edges.
-    spin.current.targetRate = nx * 0.65;
   };
-  const reset = () => {
-    mx.set(0);
-    spin.current.targetRate = 0;
-  };
+  const reset = () => mx.set(0);
 
   return (
     <section
@@ -167,7 +137,7 @@ function ProductHero({
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
-              style={cat.heroVideo ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
+              style={cat.heroSprite ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
               className="relative w-[min(560px,72vw)] will-change-transform"
             >
             <div
@@ -175,27 +145,22 @@ function ProductHero({
               className="absolute -inset-8 rounded-[3rem]"
               style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
             />
-            {cat.heroVideo ? (
-              <div className="relative mx-auto flex h-[min(560px,64vh)] aspect-square items-center justify-center">
-                {/* Ivory medallion — the video's white studio sweep multiplies away into it */}
+            {cat.heroSprite ? (
+              <div className="relative mx-auto flex h-[min(560px,64vh)] w-full items-center justify-center">
+                {/* Soft light pool beneath the floating product — no plate, no white box */}
                 <div
                   aria-hidden
-                  className="absolute inset-0 rounded-full border border-gold/25"
+                  className="absolute inset-x-[12%] bottom-[6%] h-[22%] rounded-[50%]"
                   style={{
                     background:
-                      "radial-gradient(circle at 38% 32%, color-mix(in oklab, var(--ivory) 97%, transparent) 0%, color-mix(in oklab, var(--champagne) 88%, transparent) 58%, color-mix(in oklab, var(--gold) 62%, transparent) 100%)",
-                    boxShadow: "0 40px 90px rgba(0,0,0,0.55), inset 0 0 60px color-mix(in oklab, var(--gold) 22%, transparent)",
+                      "radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--gold) 26%, transparent) 0%, transparent 72%)",
+                    filter: "blur(18px)",
                   }}
                 />
-                <div aria-hidden className="absolute -inset-3 rounded-full border border-gold/15" />
-                <video
-                  ref={videoRef}
-                  src={cat.heroVideo}
-                  muted
-                  playsInline
-                  preload="auto"
-                  aria-label={`${cat.title} — 360° view`}
-                  className="relative h-[92%] w-[92%] -translate-x-[2.5%] scale-[1.06] rounded-full object-cover mix-blend-multiply"
+                <Turntable
+                  sprite={cat.heroSprite}
+                  label={cat.title}
+                  className="relative h-full aspect-[280/438]"
                 />
               </div>
             ) : cat.heroImage ? (
@@ -219,10 +184,10 @@ function ProductHero({
           </div>
         </div>
 
-        {cat.heroVideo && (
+        {cat.heroSprite && (
           <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
             <ChevronLeft className="h-3 w-3 animate-pulse" />
-            Move cursor to rotate
+            Move cursor · drag to rotate
             <ChevronRight className="h-3 w-3 animate-pulse" />
           </div>
         )}
