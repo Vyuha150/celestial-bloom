@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
