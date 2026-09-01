@@ -4,6 +4,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
+import { Turntable } from "@/components/product/Turntable";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: ({ params }) => {
@@ -159,9 +160,7 @@ function ProductHero({
                 <Turntable
                   sprite={cat.heroSprite}
                   label={cat.title}
-                  className="relative h-full"
-                  // keep the intrinsic frame ratio so the jar never distorts
-                  style={undefined}
+                  className="relative h-full aspect-[280/438]"
                 />
               </div>
             ) : cat.heroImage ? (
@@ -185,10 +184,10 @@ function ProductHero({
           </div>
         </div>
 
-        {cat.heroVideo && (
+        {cat.heroSprite && (
           <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
             <ChevronLeft className="h-3 w-3 animate-pulse" />
-            Move cursor to rotate
+            Move cursor · drag to rotate
             <ChevronRight className="h-3 w-3 animate-pulse" />
           </div>
         )}
