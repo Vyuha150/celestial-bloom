@@ -55,10 +55,11 @@ export function Turntable({ sprite, label, className }: Props) {
       const dt = s.prevTs ? Math.min(0.05, (ts - s.prevTs) / 1000) : 0;
       s.prevTs = ts;
       if (!s.dragging) {
-        // ease toward hover target, then apply friction when idle
-        s.velocity += (s.target - s.velocity) * Math.min(1, dt * 6);
-        if (Math.abs(s.target) < 0.001) s.velocity *= Math.pow(0.12, dt); // inertia decay
-        if (Math.abs(s.velocity) < 0.02) s.velocity = 0;
+        // ease toward hover target (slightly slower ramp = cinematic feel),
+        // then apply friction once the cursor rests in the dead-zone
+        s.velocity += (s.target - s.velocity) * Math.min(1, dt * 5);
+        if (Math.abs(s.target) < 0.001) s.velocity *= Math.pow(0.05, dt); // inertia decay
+        if (Math.abs(s.velocity) < 0.01) s.velocity = 0;
         s.frame += s.velocity * dt;
         draw();
       }
@@ -78,8 +79,8 @@ export function Turntable({ sprite, label, className }: Props) {
       const dx = e.clientX - s.lastX;
       const now = performance.now();
       const dt = Math.max(8, now - s.lastT) / 1000;
-      // 1:1 drag: full sheet across ~1.15× the stage width
-      const perPx = sprite.frames / (r.width * 1.15);
+      // 1:1 drag: one full revolution across the stage width itself
+      const perPx = sprite.frames / r.width;
       s.frame += dx * perPx;
       s.velocity = (dx * perPx) / dt;
       s.lastX = e.clientX;
@@ -88,12 +89,15 @@ export function Turntable({ sprite, label, className }: Props) {
       return;
     }
 
-    // Hover: eased velocity curve with a soft dead-zone at the centre.
+    // Hover: near-linear response past a soft dead-zone, so every cursor
+    // offset produces a proportional, legible speed — sticky only at rest.
     const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
-    const dead = 0.14;
+    const dead = 0.09;
     const a = Math.abs(nx);
-    const shaped = a <= dead ? 0 : Math.pow((a - dead) / (1 - dead), 1.6);
-    s.target = Math.sign(nx) * shaped * sprite.frames * 0.62; // ≈1.6s per revolution at edges
+    const t = a <= dead ? 0 : (a - dead) / (1 - dead);
+    // smoothstep blend keeps the dead-zone edge silky (no velocity jump)
+    const shaped = t * t * (3 - 2 * t) * 0.45 + t * 0.55;
+    s.target = Math.sign(nx) * shaped * sprite.frames * 0.5; // ≈2s per revolution at edges
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
