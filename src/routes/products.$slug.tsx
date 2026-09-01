@@ -56,10 +56,6 @@ function ProductHero({
   next: Category;
 }) {
   const stage = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  // Velocity-driven turntable: cursor X sets spin rate, time advances each
-  // frame — no seeking jitter, wrap-around is seamless on a 360° video.
-  const spin = useRef({ rate: 0, targetRate: 0, time: 0, raf: 0, last: 0 });
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
   // Turntable rotation about the central vertical axis, driven by horizontal cursor position.
@@ -71,40 +67,13 @@ function ProductHero({
       `radial-gradient(55% 50% at ${50 + v * 12}% 45%, color-mix(in oklab, var(--gold) 22%, transparent) 0%, transparent 70%)`,
   );
 
-  // Drive the turntable video manually: ease the spin rate toward the cursor
-  // target, advance time per frame, and wrap seamlessly. No play()/seek churn.
-  useEffect(() => {
-    if (!cat.heroVideo) return;
-    const s = spin.current;
-    const loop = (ts: number) => {
-      const v = videoRef.current;
-      const dt = s.last ? Math.min(0.05, (ts - s.last) / 1000) : 0;
-      s.last = ts;
-      if (v && v.duration) {
-        if (!v.paused) v.pause();
-        s.rate += (s.targetRate - s.rate) * 0.08;
-        s.time = (((s.time + s.rate * dt) % 1) + 1) % 1;
-        const t = s.time * v.duration;
-        if (Math.abs(v.currentTime - t) > 0.03) v.currentTime = t;
-      }
-      s.raf = requestAnimationFrame(loop);
-    };
-    s.raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(s.raf);
-  }, [cat.heroVideo]);
-
   const onMove = (e: React.PointerEvent<HTMLElement>) => {
     const r = stage.current?.getBoundingClientRect();
     if (!r) return;
     const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
     mx.set(nx);
-    // Left of centre spins backward, right spins forward; ~1.6s per revolution at edges.
-    spin.current.targetRate = nx * 0.65;
   };
-  const reset = () => {
-    mx.set(0);
-    spin.current.targetRate = 0;
-  };
+  const reset = () => mx.set(0);
 
   return (
     <section
