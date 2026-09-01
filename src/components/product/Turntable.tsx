@@ -114,7 +114,7 @@ export function Turntable({ sprite, label, className }: Props) {
     if (!s.dragging) return;
     s.dragging = false;
     // clamp release inertia so it glides rather than whips
-    s.velocity = Math.max(-sprite.frames * 2, Math.min(sprite.frames * 2, s.velocity));
+    s.velocity = Math.max(-sprite.frames * 1.2, Math.min(sprite.frames * 1.2, s.velocity));
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
