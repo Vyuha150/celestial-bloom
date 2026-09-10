@@ -160,7 +160,7 @@ function ProductHero({
                 <Turntable
                   sprite={cat.heroSprite}
                   label={cat.title}
-                  className="relative h-full aspect-[280/438]"
+                  className="relative h-full aspect-[300/483]"
                 />
               </div>
             ) : cat.heroImage ? (
