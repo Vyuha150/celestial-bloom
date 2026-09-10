@@ -18,35 +18,49 @@ type Props = {
 /** revolutions covered by sweeping the cursor across the full stage width */
 const SWEEP_REVOLUTIONS = 0.85;
 /** idle auto-spin, revolutions per second */
-const IDLE_RPS = 0.05;
+const IDLE_RPS = 0.045;
+/** spin spring — critically damped so it accelerates and settles, never snaps */
+const SPIN_K = 46;
+const SPIN_C = 2 * Math.sqrt(SPIN_K) * 1.02;
+/** camera parallax limits */
+const TILT_X = 7; // deg, from pointer Y
+const TILT_Y = 5; // deg, from pointer X
+const SHIFT = 16; // px of lateral camera travel
 
 /**
- * True 360° turntable of a transparent product cutout.
+ * 360° turntable of a transparent product cutout, rendered on a real
+ * perspective camera rig.
  *
- * Interaction model (absolute, so it always feels "connected"):
- * - Hover: the cursor's horizontal position maps directly to an angle — move
- *   right, the product turns right by the same amount, every time. Smoothed
- *   with a critically-damped follow so it never jitters or overshoots.
- * - Drag / touch: 1:1 scrubbing with inertia and friction on release.
- * - Idle: a barely-there drift keeps the object alive.
- * Pointer Y adds a small perspective tilt for real dimensional feel.
+ * - Spin: cursor X maps to an absolute angle, followed by a critically damped
+ *   spring — the jar eases into motion and eases out, including when the
+ *   cursor crosses the centre line.
+ * - Depth: pointer X/Y drive rotateX + rotateY, a small lateral/vertical
+ *   camera shift and a dolly, plus a contact shadow that slides with the
+ *   light — so the object reads as a physical body in space.
+ * - Drag / touch: 1:1 scrubbing, released with inertia and friction.
  */
 export function Turntable({ sprite, label, className }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
+  const rigRef = useRef<HTMLDivElement>(null);
   const filmRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
 
   const state = useRef({
-    frame: 0, // rendered frame (float)
-    target: 0, // where the cursor says we should be
-    anchor: 0, // frame under the cursor when the pointer entered
+    frame: 0,
+    spin: 0, // frames/sec
+    target: 0,
+    anchor: 0,
     hovering: false,
     dragging: false,
-    velocity: 0, // frames/sec, used only for release inertia
     lastX: 0,
     lastT: 0,
-    tilt: 0,
-    tiltTarget: 0,
+    // parallax (current + target), normalised -1..1
+    px: 0,
+    py: 0,
+    tx: 0,
+    ty: 0,
+    depth: 0,
+    depthTarget: 0,
     prevTs: 0,
     raf: 0,
   });
@@ -63,31 +77,54 @@ export function Turntable({ sprite, label, className }: Props) {
 
   useEffect(() => {
     const s = state.current;
+
     const loop = (ts: number) => {
       const dt = s.prevTs ? Math.min(0.05, (ts - s.prevTs) / 1000) : 0;
       s.prevTs = ts;
 
-      if (!s.dragging) {
-        if (s.hovering) {
-          // exponential follow toward the cursor angle — smooth, never overshoots
-          const k = 1 - Math.exp(-9 * dt);
-          s.frame += (s.target - s.frame) * k;
-          s.velocity = 0;
-        } else {
-          // release inertia, decaying into a gentle idle drift
-          s.velocity *= Math.exp(-2.6 * dt);
-          const idle = IDLE_RPS * sprite.frames;
-          const v = Math.abs(s.velocity) > idle ? s.velocity : idle;
-          s.frame += v * dt;
+      if (dt > 0) {
+        if (!s.dragging) {
+          if (s.hovering) {
+            // damped spring in angle space — substepped for rock-solid stability
+            const steps = Math.max(1, Math.ceil(dt / 0.008));
+            const h = dt / steps;
+            for (let i = 0; i < steps; i++) {
+              const a = SPIN_K * (s.target - s.frame) - SPIN_C * s.spin;
+              s.spin += a * h;
+              s.frame += s.spin * h;
+            }
+          } else {
+            // inertia bleeds off, then a whisper of idle drift keeps it alive
+            s.spin *= Math.exp(-2.4 * dt);
+            const idle = IDLE_RPS * sprite.frames;
+            const blend = 1 - Math.exp(-1.6 * dt);
+            if (Math.abs(s.spin) < idle) s.spin += (idle - s.spin) * blend;
+            s.frame += s.spin * dt;
+            s.target = s.frame;
+          }
         }
-        s.tilt += (s.tiltTarget - s.tilt) * (1 - Math.exp(-7 * dt));
-        if (tiltRef.current) {
-          tiltRef.current.style.transform = `perspective(1200px) rotateX(${s.tilt.toFixed(2)}deg)`;
+
+        // camera easing (same feel in both axes)
+        const k = 1 - Math.exp(-6.5 * dt);
+        s.px += (s.tx - s.px) * k;
+        s.py += (s.ty - s.py) * k;
+        s.depth += (s.depthTarget - s.depth) * k;
+
+        if (rigRef.current) {
+          rigRef.current.style.transform =
+            `translate3d(${(s.px * SHIFT).toFixed(2)}px, ${(-s.py * SHIFT * 0.55).toFixed(2)}px, ${(s.depth * 34).toFixed(2)}px)` +
+            ` rotateX(${(-s.py * TILT_X).toFixed(2)}deg) rotateY(${(s.px * TILT_Y).toFixed(2)}deg)`;
         }
-        draw();
+        if (shadowRef.current) {
+          shadowRef.current.style.transform =
+            `translate3d(${(-s.px * 30).toFixed(2)}px, 0, 0) scale(${(1 + Math.abs(s.px) * 0.12).toFixed(3)}, ${(1 - s.py * 0.1).toFixed(3)})`;
+          shadowRef.current.style.opacity = String(0.55 - Math.abs(s.px) * 0.12);
+        }
+        if (!s.dragging) draw();
       }
       s.raf = requestAnimationFrame(loop);
     };
+
     s.raf = requestAnimationFrame(loop);
     draw();
     return () => cancelAnimationFrame(s.raf);
@@ -98,9 +135,11 @@ export function Turntable({ sprite, label, className }: Props) {
     if (!r) return;
     const s = state.current;
 
-    // small vertical tilt for dimensionality
+    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
     const ny = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2)));
-    s.tiltTarget = -ny * 5;
+    s.tx = nx;
+    s.ty = ny;
+    s.depthTarget = 1 - Math.min(1, Math.hypot(nx, ny));
 
     if (s.dragging) {
       const dx = e.clientX - s.lastX;
@@ -109,17 +148,16 @@ export function Turntable({ sprite, label, className }: Props) {
       const perPx = sprite.frames / r.width; // one revolution per stage width
       s.frame += dx * perPx;
       s.target = s.frame;
-      s.velocity = (dx * perPx) / dt;
+      s.spin = (dx * perPx) / dt;
       s.lastX = e.clientX;
       s.lastT = now;
       draw();
       return;
     }
 
-    const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
     if (!s.hovering) {
       s.hovering = true;
-      // anchor so the product doesn't jump when the cursor first arrives
+      // anchor so the jar never jumps when the cursor first arrives
       s.anchor = s.frame - nx * sprite.frames * SWEEP_REVOLUTIONS;
     }
     s.target = s.anchor + nx * sprite.frames * SWEEP_REVOLUTIONS;
@@ -137,12 +175,14 @@ export function Turntable({ sprite, label, className }: Props) {
     const s = state.current;
     if (!s.dragging) return;
     s.dragging = false;
-    s.velocity = Math.max(-sprite.frames * 1.5, Math.min(sprite.frames * 1.5, s.velocity));
+    s.spin = Math.max(-sprite.frames * 1.5, Math.min(sprite.frames * 1.5, s.spin));
     const r = hostRef.current?.getBoundingClientRect();
     if (r && s.hovering) {
       const nx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+      // re-anchor and let the spring carry the release momentum into the new angle
       s.anchor = s.frame - nx * sprite.frames * SWEEP_REVOLUTIONS;
-      s.target = s.frame;
+      s.target = s.frame + s.spin * 0.18;
+      s.anchor += s.spin * 0.18;
     }
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
@@ -155,7 +195,9 @@ export function Turntable({ sprite, label, className }: Props) {
     endDrag(e);
     const s = state.current;
     s.hovering = false;
-    s.tiltTarget = 0;
+    s.tx = 0;
+    s.ty = 0;
+    s.depthTarget = 0;
   };
 
   return (
@@ -169,9 +211,24 @@ export function Turntable({ sprite, label, className }: Props) {
       role="img"
       aria-label={`${label} — interactive 360° view`}
       className={className}
-      style={{ touchAction: "none", cursor: "ew-resize" }}
+      style={{ touchAction: "none", cursor: "ew-resize", perspective: "1100px", perspectiveOrigin: "50% 45%" }}
     >
-      <div ref={tiltRef} className="h-full w-full" style={{ willChange: "transform" }}>
+      <div
+        ref={rigRef}
+        className="relative h-full w-full"
+        style={{ transformStyle: "preserve-3d", willChange: "transform" }}
+      >
+        {/* contact shadow, grounded on the floor plane */}
+        <div
+          ref={shadowRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-x-[14%] bottom-[1%] h-[9%] rounded-[50%]"
+          style={{
+            background: "radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,0.85) 0%, transparent 72%)",
+            filter: "blur(14px)",
+            transform: "translate3d(0,0,0)",
+          }}
+        />
         <div
           ref={filmRef}
           className="h-full w-full select-none"
@@ -179,6 +236,7 @@ export function Turntable({ sprite, label, className }: Props) {
             backgroundImage: `url(${sprite.url})`,
             backgroundSize: `${sprite.cols * 100}% ${sprite.rows * 100}%`,
             backgroundRepeat: "no-repeat",
+            imageRendering: "auto",
             filter:
               "drop-shadow(0 44px 60px rgba(0,0,0,0.62)) drop-shadow(0 0 60px color-mix(in oklab, var(--gold) 16%, transparent))",
           }}
