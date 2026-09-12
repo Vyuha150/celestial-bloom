@@ -1,5 +1,6 @@
-import { useRef } from "react";
-import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag } from "lucide-react";
+
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, type Category } from "@/data/products";
@@ -45,7 +46,131 @@ const fadeUp = {
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
 
+function parsePrice(p: string) {
+  return Number(p.replace(/[^0-9.]/g, "")) || 0;
+}
+const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
+
+function PurchasePanel({ cat }: { cat: Category }) {
+  const packs = cat.tiers;
+  const defaultIdx = Math.max(0, packs.findIndex((t) => t.highlight));
+  const [packIdx, setPackIdx] = useState(defaultIdx);
+  const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
+
+  const pack = packs[packIdx];
+  const price = parsePrice(pack.price);
+  const list = Math.round(price * 1.15);
+  const off = Math.round(((list - price) / list) * 100);
+  const total = price * qty;
+
+  const addToCart = () => {
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 2200);
+  };
+
+  return (
+    <div className="mx-auto mt-10 max-w-2xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-7 text-left backdrop-blur-xl">
+      {/* Rating */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex items-center gap-1 text-gold">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Star key={i} className="h-3.5 w-3.5 fill-current" />
+          ))}
+        </span>
+        <span className="text-xs text-ivory/70">{cat.hero.badge}</span>
+      </div>
+
+      {/* Price */}
+      <div className="mt-5 flex flex-wrap items-end gap-3">
+        <span className="text-display text-4xl text-ivory">{fmt(price)}</span>
+        <span className="text-sm text-ivory/40 line-through">{fmt(list)}</span>
+        <span className="text-xs uppercase tracking-[0.25em] text-gold">{off}% off</span>
+      </div>
+      <p className="mt-1.5 text-[11px] text-ivory/45">Inclusive of duties, cold-chain delivery and lot certificate.</p>
+
+      {/* Packs */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        {packs.map((t, i) => {
+          const active = i === packIdx;
+          return (
+            <button
+              key={t.name}
+              type="button"
+              onClick={() => setPackIdx(i)}
+              aria-pressed={active}
+              className={`rounded-2xl border px-4 py-3 text-left transition-all ${
+                active
+                  ? "border-gold bg-gold/10"
+                  : "border-border bg-obsidian/60 hover:border-gold/40"
+              }`}
+            >
+              <div className="text-[9.5px] uppercase tracking-[0.25em] text-ivory/55">{t.name}</div>
+              <div className="mt-1.5 text-display text-lg text-ivory">{t.price}</div>
+              <div className="text-[10px] text-gold/80">{t.cadence}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Quantity */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-ivory/55">Quantity</span>
+          <div className="flex items-center gap-3 rounded-full border border-gold/25 px-3 py-1.5">
+            <button
+              type="button"
+              aria-label="Decrease quantity"
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              className="text-ivory/70 transition-colors hover:text-gold"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="w-6 text-center text-sm text-ivory">{qty}</span>
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              onClick={() => setQty((q) => Math.min(9, q + 1))}
+              className="text-ivory/70 transition-colors hover:text-gold"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-ivory/45">
+          Total <span className="text-ivory">{fmt(total)}</span>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={addToCart}
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold/10"
+        >
+          <ShoppingBag className="h-3.5 w-3.5" />
+          {added ? "Added to cart" : "Add to cart"}
+        </button>
+        <a
+          href="#allocate"
+          className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne"
+        >
+          Buy it now →
+        </a>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
+        <span className="text-gold/80">Only 41 lots left in allocation</span>
+        <span>Free worldwide delivery</span>
+        <span>30-day protocol guarantee</span>
+      </div>
+    </div>
+  );
+}
+
 function ProductHero({
+
   cat,
   idx,
   prev,
@@ -205,19 +330,22 @@ function ProductHero({
             {cat.hero.pitch}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a href="#allocate" className="rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
-              Reserve allocation →
-            </a>
-            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
-              See the science
-            </a>
             <span className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] text-gold">
               {cat.hero.badge}
             </span>
+            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
+              See the science
+            </a>
           </motion.div>
+
+          <motion.div variants={fadeUp}>
+            <PurchasePanel cat={cat} />
+          </motion.div>
+
           <motion.div variants={fadeUp} className="mt-5 text-[9px] tracking-[0.3em] text-ivory/40 uppercase">
             Lot CL · 2026 · {String(idx + 1).padStart(3, "0")} — {cat.items.length} SKU in range
           </motion.div>
+
         </motion.div>
 
         {/* Stats strip */}
