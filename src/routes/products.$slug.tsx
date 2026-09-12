@@ -51,7 +51,115 @@ function parsePrice(p: string) {
 }
 const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
 
+const TABS = ["Description", "Ingredients", "How to take", "Lab reports", "FAQ"] as const;
+
+function ProductDetailTabs({ cat }: { cat: Category }) {
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Description");
+
+  return (
+    <div className="mt-6 border-y border-gold/15 py-5">
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`pb-1 text-[10px] uppercase tracking-[0.25em] transition-colors ${
+              tab === t ? "border-b border-gold text-gold" : "text-ivory/50 hover:text-ivory"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-5 text-sm leading-relaxed text-ivory/75">
+        {tab === "Description" && (
+          <div className="space-y-3">
+            <p>{cat.tagline}</p>
+            <p>{cat.hero.pitch}</p>
+            <ul className="mt-2 space-y-2">
+              {cat.benefits.map((b) => (
+                <li key={b.title} className="flex gap-3">
+                  <span className="text-gold">{b.icon}</span>
+                  <span>
+                    <span className="text-ivory">{b.title}.</span> {b.body}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] text-ivory/40">
+              Claims are ingredient-based and not for the product. Images are for illustration purposes only.
+            </p>
+          </div>
+        )}
+
+        {tab === "Ingredients" && (
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {cat.items.map((i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-gold">·</span>
+                <span>{i}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {tab === "How to take" && (
+          <ol className="space-y-3">
+            {[
+              "Take one serving in the morning with 250ml water, ideally 20 minutes before your first meal.",
+              "Fat-soluble actives (D3+K2, CoQ10, astaxanthin) absorb best alongside a meal containing fats.",
+              "Evening components — magnesium, adaptogens, sleep stack — are taken 60 minutes before bed.",
+              "Run the protocol for a minimum of 90 days; re-test biomarkers each quarter and adjust with your concierge.",
+            ].map((s, i) => (
+              <li key={s} className="flex gap-3">
+                <span className="text-gold">{String(i + 1).padStart(2, "0")}</span>
+                <span>{s}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {tab === "Lab reports" && (
+          <div className="space-y-4">
+            <p>
+              Every lot is assayed by an independent ISO 17025 laboratory before release — identity, potency, heavy
+              metals, microbials and residual solvents. The certificate of analysis for your lot ships in the box and is
+              archived to your account.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {cat.stats.map((s) => (
+                <div key={s.label} className="rounded-xl border border-gold/15 bg-obsidian/50 px-4 py-3">
+                  <div className="text-display text-xl text-gold">{s.value}</div>
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-ivory/50">{s.label}</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-ivory/40">
+              Tested for: lead · cadmium · arsenic · mercury · aflatoxins · total plate count — all below detection
+              thresholds.
+            </p>
+          </div>
+        )}
+
+        {tab === "FAQ" && (
+          <div className="space-y-4">
+            {cat.faqs.map((f) => (
+              <div key={f.q}>
+                <div className="text-ivory">{f.q}</div>
+                <p className="mt-1 text-ivory/65">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PurchasePanel({ cat }: { cat: Category }) {
+
   const packs = cat.tiers;
   const defaultIdx = Math.max(0, packs.findIndex((t) => t.highlight));
   const [packIdx, setPackIdx] = useState(defaultIdx);
