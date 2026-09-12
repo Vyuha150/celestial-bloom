@@ -1,5 +1,6 @@
-import { useRef } from "react";
-import { Shield as ShieldIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState } from "react";
+import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag } from "lucide-react";
+
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, type Category } from "@/data/products";
