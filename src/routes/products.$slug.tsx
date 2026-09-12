@@ -393,7 +393,7 @@ function ProductHero({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
               style={cat.heroSprite ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
-              className="relative w-[min(560px,72vw)] will-change-transform"
+              className="relative w-[min(440px,68vw)] will-change-transform"
             >
             <div
               aria-hidden
