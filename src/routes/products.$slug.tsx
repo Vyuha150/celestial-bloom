@@ -368,7 +368,26 @@ function ProductHero({
             </span>
           </Link>
 
-          <div style={{ perspective: 1400 }} className="flex items-center justify-center">
+          <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
+            <div className="order-2 space-y-10 px-2 lg:order-1 lg:pl-16 lg:text-right">
+              {(highlightsBySlug[cat.slug] ?? []).slice(0, 3).map((h, i) => (
+                <motion.div
+                  key={h.name}
+                  initial={{ opacity: 0, x: -24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
+                >
+                  <div className="flex items-center gap-3 lg:justify-end">
+                    <span className="text-display text-xl text-champagne lg:order-1">{h.name}</span>
+                    <span className="hidden h-px w-8 bg-gold/50 lg:order-2 lg:block" />
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div style={{ perspective: 1400 }} className="order-1 flex items-center justify-center lg:order-2">
+
             <motion.div
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
