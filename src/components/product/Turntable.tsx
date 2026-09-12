@@ -17,11 +17,9 @@ type Props = {
 
 /** revolutions covered by sweeping the cursor across the full stage width */
 const SWEEP_REVOLUTIONS = 0.85;
-/** idle auto-spin, revolutions per second */
-const IDLE_RPS = 0.045;
 /** spin spring — critically damped so it accelerates and settles, never snaps */
-const SPIN_K = 46;
-const SPIN_C = 2 * Math.sqrt(SPIN_K) * 1.02;
+const SPIN_K = 38;
+const SPIN_C = 2 * Math.sqrt(SPIN_K) * 1.06;
 /** camera parallax limits */
 const TILT_X = 7; // deg, from pointer Y
 const TILT_Y = 5; // deg, from pointer X
@@ -94,11 +92,9 @@ export function Turntable({ sprite, label, className }: Props) {
               s.frame += s.spin * h;
             }
           } else {
-            // inertia bleeds off, then a whisper of idle drift keeps it alive
-            s.spin *= Math.exp(-2.4 * dt);
-            const idle = IDLE_RPS * sprite.frames;
-            const blend = 1 - Math.exp(-1.6 * dt);
-            if (Math.abs(s.spin) < idle) s.spin += (idle - s.spin) * blend;
+            // no cursor, no motion — released inertia glides to a full stop
+            s.spin *= Math.exp(-3.2 * dt);
+            if (Math.abs(s.spin) < 0.08) s.spin = 0;
             s.frame += s.spin * dt;
             s.target = s.frame;
           }
