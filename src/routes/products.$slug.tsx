@@ -436,8 +436,27 @@ function ProductHero({
               />
             )}
             </motion.div>
+            </div>
+
+            <div className="order-3 space-y-10 px-2 lg:pr-16">
+              {(highlightsBySlug[cat.slug] ?? []).slice(3, 6).map((h, i) => (
+                <motion.div
+                  key={h.name}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="hidden h-px w-8 bg-gold/50 lg:block" />
+                    <span className="text-display text-xl text-champagne">{h.name}</span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
+
 
         {cat.heroSprite && (
           <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
