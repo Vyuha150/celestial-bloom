@@ -178,7 +178,7 @@ function PurchasePanel({ cat }: { cat: Category }) {
   };
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-7 text-left backdrop-blur-xl">
+    <div className="mx-auto mt-10 w-full max-w-6xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-8 text-left backdrop-blur-xl sm:p-10">
       {/* Rating */}
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-1 text-gold">
