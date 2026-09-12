@@ -3,7 +3,7 @@ import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, Sho
 
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { categories, findCategory, type Category } from "@/data/products";
+import { categories, findCategory, highlightsBySlug, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
 import { Turntable } from "@/components/product/Turntable";
 
@@ -368,13 +368,32 @@ function ProductHero({
             </span>
           </Link>
 
-          <div style={{ perspective: 1400 }} className="flex items-center justify-center">
+          <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
+            <div className="order-2 space-y-10 px-2 lg:order-1 lg:pl-16 lg:text-right">
+              {(highlightsBySlug[cat.slug] ?? []).slice(0, 3).map((h, i) => (
+                <motion.div
+                  key={h.name}
+                  initial={{ opacity: 0, x: -24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
+                >
+                  <div className="flex items-center gap-3 lg:justify-end">
+                    <span className="text-display text-xl text-champagne lg:order-1">{h.name}</span>
+                    <span className="hidden h-px w-8 bg-gold/50 lg:order-2 lg:block" />
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            <div style={{ perspective: 1400 }} className="order-1 flex items-center justify-center lg:order-2">
+
             <motion.div
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
               style={cat.heroSprite ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
-              className="relative w-[min(560px,72vw)] will-change-transform"
+              className="relative w-[min(440px,68vw)] will-change-transform"
             >
             <div
               aria-hidden
@@ -417,8 +436,27 @@ function ProductHero({
               />
             )}
             </motion.div>
+            </div>
+
+            <div className="order-3 space-y-10 px-2 lg:pr-16">
+              {(highlightsBySlug[cat.slug] ?? []).slice(3, 6).map((h, i) => (
+                <motion.div
+                  key={h.name}
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="hidden h-px w-8 bg-gold/50 lg:block" />
+                    <span className="text-display text-xl text-champagne">{h.name}</span>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
+
 
         {cat.heroSprite && (
           <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
