@@ -92,11 +92,9 @@ export function Turntable({ sprite, label, className }: Props) {
               s.frame += s.spin * h;
             }
           } else {
-            // inertia bleeds off, then a whisper of idle drift keeps it alive
-            s.spin *= Math.exp(-2.4 * dt);
-            const idle = IDLE_RPS * sprite.frames;
-            const blend = 1 - Math.exp(-1.6 * dt);
-            if (Math.abs(s.spin) < idle) s.spin += (idle - s.spin) * blend;
+            // no cursor, no motion — released inertia glides to a full stop
+            s.spin *= Math.exp(-3.2 * dt);
+            if (Math.abs(s.spin) < 0.08) s.spin = 0;
             s.frame += s.spin * dt;
             s.target = s.frame;
           }
