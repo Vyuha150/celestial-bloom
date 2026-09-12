@@ -319,14 +319,8 @@ function ProductHero({
 
         {/* Stable description */}
         <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-3xl text-center">
-          <motion.h1
-            variants={fadeUp}
-            className="text-display text-[clamp(2.2rem,5vw,4.25rem)] leading-[1.06] text-ivory"
-            style={{ textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}
-          >
-            {cat.hero.headline} <span className="italic text-gold">{cat.hero.italic}</span>
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ivory/80">
+          <motion.p variants={fadeUp} className="mx-auto max-w-xl text-base leading-relaxed text-ivory/80">
+
             {cat.hero.pitch}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-4">
