@@ -146,7 +146,7 @@ function ProductHero({
               style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
             />
             {cat.heroSprite ? (
-              <div className="relative mx-auto flex h-[min(560px,64vh)] w-full items-center justify-center">
+              <div className="relative mx-auto flex h-[min(489px,58vh)] w-full items-center justify-center">
                 {/* Soft light pool beneath the floating product — no plate, no white box */}
                 <div
                   aria-hidden
@@ -160,7 +160,7 @@ function ProductHero({
                 <Turntable
                   sprite={cat.heroSprite}
                   label={cat.title}
-                  className="relative h-full aspect-[300/483]"
+                  className="relative h-full aspect-[304/489]"
                 />
               </div>
             ) : cat.heroImage ? (
@@ -187,7 +187,7 @@ function ProductHero({
         {cat.heroSprite && (
           <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
             <ChevronLeft className="h-3 w-3 animate-pulse" />
-            Move cursor · drag to rotate
+            Move cursor or drag to rotate
             <ChevronRight className="h-3 w-3 animate-pulse" />
           </div>
         )}
