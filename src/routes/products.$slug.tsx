@@ -344,29 +344,8 @@ function ProductHero({
 
         {/* Cursor-reactive stage */}
         <div className="relative mt-10 flex items-center justify-center">
-          {/* Arrows */}
-          <Link
-            to="/products/$slug"
-            params={{ slug: prev.slug }}
-            aria-label={`Previous category: ${prev.title}`}
-            className="group absolute left-0 z-20 flex items-center gap-3 text-ivory/60 transition-colors hover:text-gold"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/30 transition-all duration-500 group-hover:-translate-x-1 group-hover:border-gold">
-              <ChevronLeft className="h-4 w-4" />
-            </span>
-            <span className="hidden text-[10px] uppercase tracking-[0.3em] lg:inline">{prev.title}</span>
-          </Link>
-          <Link
-            to="/products/$slug"
-            params={{ slug: next.slug }}
-            aria-label={`Next category: ${next.title}`}
-            className="group absolute right-0 z-20 flex items-center gap-3 text-ivory/60 transition-colors hover:text-gold"
-          >
-            <span className="hidden text-[10px] uppercase tracking-[0.3em] lg:inline">{next.title}</span>
-            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/30 transition-all duration-500 group-hover:translate-x-1 group-hover:border-gold">
-              <ChevronRight className="h-4 w-4" />
-            </span>
-          </Link>
+
+
 
           <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
             <div className="order-2 space-y-10 px-2 lg:order-1 lg:pl-16 lg:text-right">
