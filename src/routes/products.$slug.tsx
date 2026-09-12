@@ -205,19 +205,22 @@ function ProductHero({
             {cat.hero.pitch}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a href="#allocate" className="rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne">
-              Reserve allocation →
-            </a>
-            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
-              See the science
-            </a>
             <span className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] text-gold">
               {cat.hero.badge}
             </span>
+            <a href="#science" className="text-[10.5px] uppercase tracking-[0.3em] text-ivory/70 transition-colors hover:text-gold">
+              See the science
+            </a>
           </motion.div>
+
+          <motion.div variants={fadeUp}>
+            <PurchasePanel cat={cat} />
+          </motion.div>
+
           <motion.div variants={fadeUp} className="mt-5 text-[9px] tracking-[0.3em] text-ivory/40 uppercase">
             Lot CL · 2026 · {String(idx + 1).padStart(3, "0")} — {cat.items.length} SKU in range
           </motion.div>
+
         </motion.div>
 
         {/* Stats strip */}
