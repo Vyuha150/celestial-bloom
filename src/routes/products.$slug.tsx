@@ -81,6 +81,9 @@ function PurchasePanel({ cat }: { cat: Category }) {
         <span className="text-xs text-ivory/70">{cat.hero.badge}</span>
       </div>
 
+      <ProductDetailTabs cat={cat} />
+
+
       {/* Price */}
       <div className="mt-5 flex flex-wrap items-end gap-3">
         <span className="text-display text-4xl text-ivory">{fmt(price)}</span>
