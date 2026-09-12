@@ -178,7 +178,7 @@ function PurchasePanel({ cat }: { cat: Category }) {
   };
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-6xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-8 text-left backdrop-blur-xl sm:p-10">
+    <div className="mx-auto mt-10 w-full max-w-2xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-8 text-left backdrop-blur-xl sm:p-10">
       {/* Rating */}
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-1 text-gold">
@@ -467,7 +467,7 @@ function ProductHero({
         )}
 
         {/* Stable description */}
-        <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-6xl text-center">
+        <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-3xl text-center">
           <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-4">
 
             <span className="rounded-full border border-gold/40 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] text-gold">
