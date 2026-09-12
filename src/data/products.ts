@@ -450,3 +450,65 @@ export const categories: Category[] = [
 export const totalSkus = categories.reduce((n, c) => n + c.items.length, 0);
 
 export const findCategory = (slug: string) => categories.find((c) => c.slug === slug);
+
+export type Highlight = { name: string; body: string };
+
+// Six signature actives per category — rendered flanking the rotating product.
+export const highlightsBySlug: Record<string, Highlight[]> = {
+  "core-performance-stack": [
+    { name: "Ashwagandha KSM-66®", body: "Sacred root of resilience. Calms the nervous system and rebuilds vitality at the cellular level." },
+    { name: "Spirulina & Chlorella", body: "Cold-pressed green matrix. Chlorophyll, phycocyanin and a complete amino profile." },
+    { name: "Rhodiola Rosea", body: "High-altitude adaptogen. Sustains output under load without stimulant debt." },
+    { name: "PQQ + CoQ10", body: "Mitochondrial co-factors that build new power plants inside the cell." },
+    { name: "L-Theanine", body: "Smooths cortical arousal into calm, uninterrupted six-hour focus blocks." },
+    { name: "Magnesium Threonate", body: "The only form that crosses into the brain. Deep restorative sleep architecture." },
+  ],
+  "bioavailability-capsules": [
+    { name: "Liposomal Vitamin C", body: "Phospholipid envelope escorts ascorbate straight through the cell membrane." },
+    { name: "Nano CoQ10", body: "120nm droplets — fat-soluble energy delivered without a fatty meal." },
+    { name: "Magnesium Glycinate", body: "Amino-chelated for clean uptake and zero gastric burden." },
+    { name: "Zinc Bisglycinate", body: "Immune and hormonal signalling in its gentlest, most absorbable bond." },
+    { name: "D3 + K2 in MCT", body: "Calcium routed to bone, never artery. Delivered in medium-chain lipid." },
+    { name: "Methylated B12", body: "Pre-activated methylcobalamin bypasses MTHFR bottlenecks entirely." },
+  ],
+  "precision-powders": [
+    { name: "Grass-fed Whey Isolate", body: "Cold cross-flow filtered. Native protein architecture, full BCAA spectrum." },
+    { name: "Collagen I + III", body: "Low-weight peptides for skin, tendon and connective renewal." },
+    { name: "Creapure® Creatine", body: "Source-verified monohydrate at 99.9% purity. Power and cognition." },
+    { name: "Lion's Mane", body: "Dual extract — hericenones and erinacines for nerve growth support." },
+    { name: "Reishi", body: "The mushroom of immortality. Evening calm and immune modulation." },
+    { name: "Plasma Electrolytes", body: "Sodium, potassium and magnesium modelled on plasma osmolality." },
+  ],
+  "functional-beverages": [
+    { name: "NMN", body: "Pharmaceutical-grade precursor, citrate-stabilised for NAD+ restoration." },
+    { name: "Alpha-GPC", body: "Choline donor for acetylcholine — sharpness within twenty minutes." },
+    { name: "Molecular Hydrogen", body: "1.6ppm dissolved H₂. Selective antioxidant signalling, no aftertaste." },
+    { name: "Marine Collagen", body: "10g per bottle. Skin luminosity from the dermal layer outward." },
+    { name: "Prebiotic Inulin", body: "Chicory-root fibre that feeds the strains you already carry." },
+    { name: "Tulsi", body: "Holy basil, the queen of herbs. An adaptogen that meets stress with grace." },
+  ],
+  "smart-gummies-strips": [
+    { name: "NAD+ Precursor", body: "250mg per piece — cellular repair in a dose that actually registers." },
+    { name: "Melatonin + Theanine", body: "Micro-dosed onset, no morning fog. Sleep entry, not sedation." },
+    { name: "Astaxanthin", body: "Marine carotenoid. The most potent antioxidant measured in nature." },
+    { name: "Lion's Mane Extract", body: "500mg fruiting body for clarity and long-arc cognitive maintenance." },
+    { name: "Iron Bisglycinate", body: "27mg chelated iron that rebuilds ferritin without the gut penalty." },
+    { name: "Sublingual B12", body: "1000µg strip dissolving in 30 seconds — first-pass metabolism bypassed." },
+  ],
+  "luxury-ready-to-consume": [
+    { name: "Single-origin Cacao", body: "70% mass. Theobromine and polyphenols, bitter-bright and unsweetened." },
+    { name: "Milk Protein Isolate", body: "22g per bar within ±0.4g tolerance. Macros that pass any audit." },
+    { name: "MCT C8", body: "Caprylic acid converted to ketones in minutes for clean cerebral fuel." },
+    { name: "High-DHA Salmon", body: "Cold-smoked, wild-caught. 850mg of cognitive lipid per serving." },
+    { name: "Allulose", body: "Rare sugar with sweetness and no glycemic cost. Never a sugar alcohol." },
+    { name: "Cultured Colostrum", body: "Immunoglobulin-rich protein for gut lining and immune tone." },
+  ],
+  "diagnostic-protocols": [
+    { name: "Hormone Panel", body: "18 markers — thyroid, adrenal and sex hormones read as one system." },
+    { name: "hs-CRP & Immunity", body: "12 inflammatory markers detecting the fire years before symptoms." },
+    { name: "ApoB & Lipids", body: "The particle count that actually predicts cardiovascular risk." },
+    { name: "Micronutrient Map", body: "16 intracellular markers — what reached the cell, not just the blood." },
+    { name: "16S + Shotgun", body: "Full microbiome sequencing paired with a personalised probiotic pull." },
+    { name: "Clinician Review", body: "A 1:1 hour where every number becomes a protocol adjustment." },
+  ],
+};
