@@ -17,11 +17,9 @@ type Props = {
 
 /** revolutions covered by sweeping the cursor across the full stage width */
 const SWEEP_REVOLUTIONS = 0.85;
-/** idle auto-spin, revolutions per second */
-const IDLE_RPS = 0.045;
 /** spin spring — critically damped so it accelerates and settles, never snaps */
-const SPIN_K = 46;
-const SPIN_C = 2 * Math.sqrt(SPIN_K) * 1.02;
+const SPIN_K = 38;
+const SPIN_C = 2 * Math.sqrt(SPIN_K) * 1.06;
 /** camera parallax limits */
 const TILT_X = 7; // deg, from pointer Y
 const TILT_Y = 5; // deg, from pointer X
