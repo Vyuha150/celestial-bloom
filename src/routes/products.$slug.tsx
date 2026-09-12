@@ -3,7 +3,7 @@ import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, Sho
 
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
-import { categories, findCategory, type Category } from "@/data/products";
+import { categories, findCategory, highlightsBySlug, type Category } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
 import { Turntable } from "@/components/product/Turntable";
 
