@@ -321,7 +321,6 @@ function ProductHero({
         <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-3xl text-center">
           <motion.p variants={fadeUp} className="mx-auto max-w-xl text-base leading-relaxed text-ivory/80">
 
-          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-ivory/80">
             {cat.hero.pitch}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-4">
