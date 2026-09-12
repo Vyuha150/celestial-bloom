@@ -6,7 +6,7 @@ import catGummies from "@/assets/cat-gummies.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catDiagnostic from "@/assets/cat-diagnostic.jpg";
 import ritualGreensHero from "@/assets/p-ritual-greens-hero.png.asset.json";
-import ritualGreensSprite from "@/assets/ritual-greens-turntable-v3.webp.asset.json";
+import ritualGreensSprite from "@/assets/ritual-greens-turntable-v4.webp.asset.json";
 
 export type Stat = { value: string; label: string };
 export type Benefit = { icon: string; title: string; body: string };
@@ -72,7 +72,7 @@ export const categories: Category[] = [
     tagline: "The daily operating system. Foundational molecules for the elite human.",
     image: catCore,
     heroImage: ritualGreensHero.url,
-    heroSprite: { url: ritualGreensSprite.url, frames: 72, cols: 9, rows: 8, aspect: 300 / 483 },
+    heroSprite: { url: ritualGreensSprite.url, frames: 72, cols: 9, rows: 8, aspect: 304 / 489 },
     items: [
       "Precision greens complex (v.12+)",
       "Complete amino acid matrix",
