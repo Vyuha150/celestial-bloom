@@ -1,20 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, X } from "lucide-react";
-import { listProducts, createProduct, updateProduct, deleteProduct, listCategories, type AdminProduct, type ProductInput } from "@/admin/api";
+import { useMemo, useRef, useState } from "react";
+import { Plus, Search, Pencil, Trash2, X, Upload } from "lucide-react";
+import {
+  listProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  listCategories,
+  uploadProductImages,
+  type AdminProduct,
+  type ProductInput,
+} from "@/admin/api";
+import { API_URL } from "@/lib/apiClient";
 import { StatusPill } from "./admin.index";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsAdmin,
 });
 
+// Defaults to "live" — a newly added product should be sellable
+// immediately; "draft" as a default meant every new product silently
+// failed to appear in the storefront until someone remembered to flip it.
 const emptyForm: ProductInput = {
   category: "",
   name: "",
   price: 0,
   stock: 0,
-  status: "draft",
+  status: "live",
   cadence: "/ one-time",
   cta: "Order now",
   perks: [],
@@ -27,7 +40,7 @@ function categoryTitle(p: AdminProduct): string {
 function ProductsAdmin() {
   const queryClient = useQueryClient();
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<{ id: string | null; form: ProductInput } | null>(null);
+  const [editing, setEditing] = useState<{ id: string | null; form: ProductInput; images: string[] } | null>(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "products", q],
@@ -39,9 +52,12 @@ function ProductsAdmin() {
 
   const createMut = useMutation({
     mutationFn: (body: ProductInput) => createProduct(body),
-    onSuccess: () => {
+    onSuccess: (created) => {
       invalidate();
-      setEditing(null);
+      // Stay open in edit mode (rather than closing) so images can be
+      // uploaded right away — the upload endpoint needs a product id,
+      // which doesn't exist until this first save completes.
+      setEditing({ id: created._id, form: editing?.form ?? emptyForm, images: created.images ?? [] });
     },
   });
   const updateMut = useMutation({
@@ -55,13 +71,28 @@ function ProductsAdmin() {
     mutationFn: (id: string) => deleteProduct(id),
     onSuccess: invalidate,
   });
+  const uploadMut = useMutation({
+    mutationFn: ({ id, files }: { id: string; files: File[] }) => uploadProductImages(id, files),
+    onSuccess: (updated) => {
+      invalidate();
+      setEditing((cur) => (cur ? { ...cur, images: updated.images } : cur));
+    },
+  });
+  const removeImageMut = useMutation({
+    mutationFn: ({ id, images }: { id: string; images: string[] }) => updateProduct(id, { images }),
+    onSuccess: (updated) => {
+      invalidate();
+      setEditing((cur) => (cur ? { ...cur, images: updated.images } : cur));
+    },
+  });
 
   const items = useMemo(() => data?.items ?? [], [data]);
 
-  const openNew = () => setEditing({ id: null, form: { ...emptyForm, category: categories?.[0]?._id ?? "" } });
+  const openNew = () => setEditing({ id: null, form: { ...emptyForm, category: categories?.[0]?._id ?? "" }, images: [] });
   const openEdit = (p: AdminProduct) =>
     setEditing({
       id: p._id,
+      images: p.images,
       form: {
         category: typeof p.category === "string" ? p.category : p.category._id,
         name: p.name,
@@ -167,6 +198,13 @@ function ProductsAdmin() {
           error={createMut.error ?? updateMut.error}
           onClose={() => setEditing(null)}
           onSave={save}
+          productId={editing.id}
+          images={editing.images}
+          onUpload={(files) => editing.id && uploadMut.mutate({ id: editing.id, files })}
+          onRemoveImage={(img) =>
+            editing.id && removeImageMut.mutate({ id: editing.id, images: editing.images.filter((i) => i !== img) })
+          }
+          uploading={uploadMut.isPending}
         />
       )}
     </div>
@@ -181,6 +219,11 @@ function ProductDrawer({
   error,
   onClose,
   onSave,
+  productId,
+  images,
+  onUpload,
+  onRemoveImage,
+  uploading,
 }: {
   isNew: boolean;
   initial: ProductInput;
@@ -189,9 +232,15 @@ function ProductDrawer({
   error: unknown;
   onClose: () => void;
   onSave: (p: ProductInput) => void;
+  productId: string | null;
+  images: string[];
+  onUpload: (files: File[]) => void;
+  onRemoveImage: (image: string) => void;
+  uploading: boolean;
 }) {
   const [p, setP] = useState<ProductInput>(initial);
   const set = <K extends keyof ProductInput>(k: K, v: ProductInput[K]) => setP((s) => ({ ...s, [k]: v }));
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="fixed inset-0 z-50 bg-obsidian/80 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
@@ -235,6 +284,52 @@ function ProductDrawer({
           <Input label="Price (USD)" type="number" value={String(p.price)} onChange={(v) => set("price", Number(v))} />
           <Input label="Stock" type="number" value={String(p.stock ?? 0)} onChange={(v) => set("stock", Number(v))} />
           <Input label="Cadence" value={p.cadence ?? ""} onChange={(v) => set("cadence", v)} />
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <Label>Images</Label>
+          {!productId ? (
+            <p className="text-xs text-muted-foreground mt-1">Save the product first to add images.</p>
+          ) : (
+            <>
+              {images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2 mb-3">
+                  {images.map((img) => (
+                    <div key={img} className="relative group">
+                      <img src={`${API_URL}${img}`} alt="" className="w-full aspect-square object-cover border border-border" />
+                      <button
+                        onClick={() => onRemoveImage(img)}
+                        title="Remove image"
+                        className="absolute top-1 right-1 p-0.5 bg-obsidian/80 border border-border opacity-0 group-hover:opacity-100 hover:border-rose-400"
+                      >
+                        <X className="size-3 text-rose-400" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (files.length) onUpload(files);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs border border-border hover:border-gold disabled:opacity-50"
+              >
+                <Upload className="size-3.5" /> {uploading ? "Uploading…" : "Upload images"}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-border">

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Search, Filter, Eye, X } from "lucide-react";
-import { listOrders, updateOrderStatus, type AdminOrder } from "@/admin/api";
+import { Search, Filter, Eye, X, Truck } from "lucide-react";
+import { listOrders, updateOrderStatus, updateOrderTracking, type AdminOrder, type OrderTracking } from "@/admin/api";
 import { StatusPill } from "./admin.index";
 
 export const Route = createFileRoute("/admin/orders")({
@@ -27,6 +27,14 @@ function OrdersPage() {
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      setActive(updated);
+    },
+  });
+
+  const trackingMut = useMutation({
+    mutationFn: ({ id, tracking }: { id: string; tracking: OrderTracking }) => updateOrderTracking(id, tracking),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       setActive(updated);
     },
   });
@@ -159,9 +167,71 @@ function OrdersPage() {
                 ))}
               </div>
             </div>
+
+            <TrackingSection
+              key={active._id}
+              tracking={active.tracking}
+              saving={trackingMut.isPending}
+              onSave={(tracking) => trackingMut.mutate({ id: active._id, tracking })}
+            />
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function TrackingSection({
+  tracking,
+  saving,
+  onSave,
+}: {
+  tracking: OrderTracking | undefined;
+  saving: boolean;
+  onSave: (t: OrderTracking) => void;
+}) {
+  const [carrier, setCarrier] = useState(tracking?.carrier ?? "");
+  const [trackingNumber, setTrackingNumber] = useState(tracking?.trackingNumber ?? "");
+  const [trackingUrl, setTrackingUrl] = useState(tracking?.trackingUrl ?? "");
+
+  return (
+    <div className="border-t border-border pt-4">
+      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <Truck className="size-3.5" /> Delivery tracking
+      </p>
+      {(tracking?.shippedAt || tracking?.deliveredAt) && (
+        <div className="flex gap-4 text-[11px] text-muted-foreground mb-2">
+          {tracking.shippedAt && <span>Shipped {new Date(tracking.shippedAt).toLocaleDateString()}</span>}
+          {tracking.deliveredAt && <span>Delivered {new Date(tracking.deliveredAt).toLocaleDateString()}</span>}
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          value={carrier}
+          onChange={(e) => setCarrier(e.target.value)}
+          placeholder="Carrier (e.g. Bluedart)"
+          className="px-3 py-2 bg-obsidian border border-border text-sm outline-none focus:border-gold"
+        />
+        <input
+          value={trackingNumber}
+          onChange={(e) => setTrackingNumber(e.target.value)}
+          placeholder="Tracking number"
+          className="px-3 py-2 bg-obsidian border border-border text-sm outline-none focus:border-gold"
+        />
+        <input
+          value={trackingUrl}
+          onChange={(e) => setTrackingUrl(e.target.value)}
+          placeholder="Tracking URL (optional)"
+          className="col-span-2 px-3 py-2 bg-obsidian border border-border text-sm outline-none focus:border-gold"
+        />
+      </div>
+      <button
+        onClick={() => onSave({ carrier, trackingNumber, trackingUrl })}
+        disabled={saving}
+        className="mt-2 px-3 py-1.5 text-xs bg-gold text-obsidian font-medium hover:bg-gold/90 disabled:opacity-60"
+      >
+        {saving ? "Saving…" : "Save tracking"}
+      </button>
     </div>
   );
 }

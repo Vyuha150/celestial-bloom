@@ -45,6 +45,7 @@ export type ProductInput = {
   compareAtPrice?: number;
   stock?: number;
   status?: AdminProduct["status"];
+  images?: string[];
   perks?: string[];
   highlight?: boolean;
   cta?: string;
@@ -70,8 +71,15 @@ export function adjustStock(id: string, change: number, reason: "restock" | "adj
   return adminFetch(`/admin/products/${id}/stock`, { method: "POST", body: { change, reason, note } });
 }
 
+export function uploadProductImages(id: string, files: File[]): Promise<AdminProduct> {
+  const form = new FormData();
+  for (const file of files) form.append("images", file);
+  return adminFetch(`/admin/products/${id}/images`, { method: "POST", body: form });
+}
+
 // ---- Orders ----
 export type AdminOrderItem = { product: string; name: string; category: string; price: number; qty: number; lineTotal: number };
+export type OrderTracking = { carrier?: string; trackingNumber?: string; trackingUrl?: string; shippedAt?: string; deliveredAt?: string };
 export type AdminOrder = {
   _id: string;
   orderNumber: string;
@@ -82,6 +90,7 @@ export type AdminOrder = {
   total: number;
   status: "pending" | "paid" | "shipped" | "delivered" | "refunded" | "cancelled";
   paymentStatus: string;
+  tracking?: OrderTracking;
   createdAt: string;
 };
 
@@ -103,6 +112,10 @@ export function deleteOrder(id: string): Promise<void> {
 
 export function refreshOrderPayment(id: string): Promise<{ razorpayStatus: string; order: AdminOrder }> {
   return adminFetch(`/admin/orders/${id}/refresh-payment`, { method: "POST" });
+}
+
+export function updateOrderTracking(id: string, body: OrderTracking): Promise<AdminOrder> {
+  return adminFetch(`/admin/orders/${id}/tracking`, { method: "PATCH", body });
 }
 
 // ---- Customers ----
