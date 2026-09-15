@@ -1,40 +1,88 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Plus, Search, Pencil, Trash2, X } from "lucide-react";
-import { adminProducts, type AdminProduct } from "@/data/admin";
+import { listProducts, createProduct, updateProduct, deleteProduct, listCategories, type AdminProduct, type ProductInput } from "@/admin/api";
 import { StatusPill } from "./admin.index";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsAdmin,
 });
 
-const empty: AdminProduct = {
-  id: "", name: "", category: "Core", price: 0, stock: 0, status: "draft", sales30d: 0,
+const emptyForm: ProductInput = {
+  category: "",
+  name: "",
+  price: 0,
+  stock: 0,
+  status: "draft",
+  cadence: "/ one-time",
+  cta: "Order now",
+  perks: [],
 };
 
+function categoryTitle(p: AdminProduct): string {
+  return typeof p.category === "string" ? p.category : p.category.title;
+}
+
 function ProductsAdmin() {
-  const [items, setItems] = useState<AdminProduct[]>(adminProducts);
+  const queryClient = useQueryClient();
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<AdminProduct | null>(null);
+  const [editing, setEditing] = useState<{ id: string | null; form: ProductInput } | null>(null);
 
-  const filtered = useMemo(
-    () => items.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()) || p.category.toLowerCase().includes(q.toLowerCase())),
-    [items, q],
-  );
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["admin", "products", q],
+    queryFn: () => listProducts({ search: q || undefined, limit: 100 }),
+  });
+  const { data: categories } = useQuery({ queryKey: ["admin", "categories"], queryFn: listCategories });
 
-  const save = (p: AdminProduct) => {
-    if (!p.name.trim()) return;
-    setItems((prev) => {
-      const exists = prev.some((x) => x.id === p.id);
-      if (exists) return prev.map((x) => (x.id === p.id ? p : x));
-      return [...prev, { ...p, id: `p_${Math.random().toString(36).slice(2, 8)}` }];
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+
+  const createMut = useMutation({
+    mutationFn: (body: ProductInput) => createProduct(body),
+    onSuccess: () => {
+      invalidate();
+      setEditing(null);
+    },
+  });
+  const updateMut = useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Partial<ProductInput> }) => updateProduct(id, body),
+    onSuccess: () => {
+      invalidate();
+      setEditing(null);
+    },
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteProduct(id),
+    onSuccess: invalidate,
+  });
+
+  const items = useMemo(() => data?.items ?? [], [data]);
+
+  const openNew = () => setEditing({ id: null, form: { ...emptyForm, category: categories?.[0]?._id ?? "" } });
+  const openEdit = (p: AdminProduct) =>
+    setEditing({
+      id: p._id,
+      form: {
+        category: typeof p.category === "string" ? p.category : p.category._id,
+        name: p.name,
+        price: p.price,
+        stock: p.stock,
+        status: p.status,
+        cadence: p.cadence,
+        cta: p.cta,
+        perks: p.perks,
+      },
     });
-    setEditing(null);
+
+  const save = (form: ProductInput) => {
+    if (!form.name.trim() || !form.category) return;
+    if (editing?.id) updateMut.mutate({ id: editing.id, body: form });
+    else createMut.mutate(form);
   };
 
   const remove = (id: string) => {
     if (!confirm("Delete this product?")) return;
-    setItems((p) => p.filter((x) => x.id !== id));
+    deleteMut.mutate(id);
   };
 
   return (
@@ -43,11 +91,12 @@ function ProductsAdmin() {
         <div>
           <p className="text-eyebrow">Catalog</p>
           <h1 className="text-display text-4xl mt-1">Products</h1>
-          <p className="text-sm text-muted-foreground mt-1">{items.length} SKUs</p>
+          <p className="text-sm text-muted-foreground mt-1">{data?.pagination.total ?? 0} SKUs</p>
         </div>
         <button
-          onClick={() => setEditing(empty)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-obsidian text-sm font-medium hover:bg-gold/90"
+          onClick={openNew}
+          disabled={!categories?.length}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gold text-obsidian text-sm font-medium hover:bg-gold/90 disabled:opacity-50"
         >
           <Plus className="size-4" /> New product
         </button>
@@ -55,8 +104,10 @@ function ProductsAdmin() {
 
       <div className="flex items-center gap-2 px-3 py-2 border border-border bg-midnight/40 max-w-md">
         <Search className="size-4 text-muted-foreground" />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU or category" className="bg-transparent outline-none flex-1 text-sm" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search product name" className="bg-transparent outline-none flex-1 text-sm" />
       </div>
+
+      {error && <p className="text-sm text-rose-400">Failed to load products.</p>}
 
       <div className="border border-border bg-midnight/40 overflow-x-auto">
         <table className="w-full text-sm">
@@ -72,82 +123,129 @@ function ProductsAdmin() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
-              <tr key={p.id} className="border-b border-border/40 hover:bg-midnight/60">
-                <td className="px-5 py-3">
-                  <div>{p.name}</div>
-                  <div className="text-xs text-muted-foreground font-mono">{p.id}</div>
-                </td>
-                <td className="py-3">{p.category}</td>
-                <td className="py-3">${p.price}</td>
-                <td className="py-3">
-                  <span className={p.stock === 0 ? "text-rose-400" : p.stock < 20 ? "text-amber-400" : ""}>
-                    {p.stock}
-                  </span>
-                </td>
-                <td className="py-3">{p.sales30d}</td>
-                <td className="py-3"><StatusPill status={p.status} /></td>
-                <td className="px-5 py-3 text-right">
-                  <div className="inline-flex gap-2">
-                    <button onClick={() => setEditing(p)} className="p-1.5 hover:bg-midnight border border-transparent hover:border-border" title="Edit">
-                      <Pencil className="size-3.5 text-gold" />
-                    </button>
-                    <button onClick={() => remove(p.id)} className="p-1.5 hover:bg-midnight border border-transparent hover:border-border" title="Delete">
-                      <Trash2 className="size-3.5 text-rose-400" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {isLoading ? (
+              <tr><td colSpan={7} className="px-5 py-6 text-center text-muted-foreground">Loading…</td></tr>
+            ) : items.length === 0 ? (
+              <tr><td colSpan={7} className="px-5 py-6 text-center text-muted-foreground">No products found.</td></tr>
+            ) : (
+              items.map((p) => (
+                <tr key={p._id} className="border-b border-border/40 hover:bg-midnight/60">
+                  <td className="px-5 py-3">
+                    <div>{p.name}</div>
+                    <div className="text-xs text-muted-foreground font-mono">{p.sku}</div>
+                  </td>
+                  <td className="py-3">{categoryTitle(p)}</td>
+                  <td className="py-3">${p.price}</td>
+                  <td className="py-3">
+                    <span className={p.stock === 0 ? "text-rose-400" : p.stock < 20 ? "text-amber-400" : ""}>{p.stock}</span>
+                  </td>
+                  <td className="py-3">{p.sales30d}</td>
+                  <td className="py-3"><StatusPill status={p.status} /></td>
+                  <td className="px-5 py-3 text-right">
+                    <div className="inline-flex gap-2">
+                      <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-midnight border border-transparent hover:border-border" title="Edit">
+                        <Pencil className="size-3.5 text-gold" />
+                      </button>
+                      <button onClick={() => remove(p._id)} className="p-1.5 hover:bg-midnight border border-transparent hover:border-border" title="Delete">
+                        <Trash2 className="size-3.5 text-rose-400" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {editing && <ProductDrawer initial={editing} onClose={() => setEditing(null)} onSave={save} />}
+      {editing && (
+        <ProductDrawer
+          isNew={!editing.id}
+          initial={editing.form}
+          categories={categories ?? []}
+          saving={createMut.isPending || updateMut.isPending}
+          error={createMut.error ?? updateMut.error}
+          onClose={() => setEditing(null)}
+          onSave={save}
+        />
+      )}
     </div>
   );
 }
 
-function ProductDrawer({ initial, onClose, onSave }: { initial: AdminProduct; onClose: () => void; onSave: (p: AdminProduct) => void }) {
-  const [p, setP] = useState<AdminProduct>(initial);
-  const set = <K extends keyof AdminProduct>(k: K, v: AdminProduct[K]) => setP((s) => ({ ...s, [k]: v }));
+function ProductDrawer({
+  isNew,
+  initial,
+  categories,
+  saving,
+  error,
+  onClose,
+  onSave,
+}: {
+  isNew: boolean;
+  initial: ProductInput;
+  categories: { _id: string; slug: string; title: string }[];
+  saving: boolean;
+  error: unknown;
+  onClose: () => void;
+  onSave: (p: ProductInput) => void;
+}) {
+  const [p, setP] = useState<ProductInput>(initial);
+  const set = <K extends keyof ProductInput>(k: K, v: ProductInput[K]) => setP((s) => ({ ...s, [k]: v }));
 
   return (
     <div className="fixed inset-0 z-50 bg-obsidian/80 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="bg-midnight border border-border w-full max-w-lg p-6 space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-eyebrow">{initial.id ? "Edit" : "New"}</p>
-            <h2 className="text-display text-2xl">{initial.id ? "Edit product" : "New product"}</h2>
+            <p className="text-eyebrow">{isNew ? "New" : "Edit"}</p>
+            <h2 className="text-display text-2xl">{isNew ? "New product" : "Edit product"}</h2>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="size-5" /></button>
         </div>
+
+        {error instanceof Error && <p className="text-xs text-rose-300">{error.message}</p>}
 
         <div className="grid grid-cols-2 gap-3">
           <Input label="Name" value={p.name} onChange={(v) => set("name", v)} className="col-span-2" />
           <div>
             <Label>Category</Label>
-            <select value={p.category} onChange={(e) => set("category", e.target.value)} className="w-full px-3 py-2 bg-obsidian border border-border text-sm outline-none">
-              {["Core", "Bio", "Gummies", "Beverages", "Powders", "Luxury", "Diagnostic"].map((c) => (
-                <option key={c} value={c}>{c}</option>
+            <select
+              value={p.category}
+              onChange={(e) => set("category", e.target.value)}
+              className="w-full px-3 py-2 bg-obsidian border border-border text-sm outline-none"
+            >
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>{c.title}</option>
               ))}
             </select>
           </div>
           <div>
             <Label>Status</Label>
-            <select value={p.status} onChange={(e) => set("status", e.target.value as AdminProduct["status"])} className="w-full px-3 py-2 bg-obsidian border border-border text-sm outline-none">
+            <select
+              value={p.status}
+              onChange={(e) => set("status", e.target.value as ProductInput["status"])}
+              className="w-full px-3 py-2 bg-obsidian border border-border text-sm outline-none"
+            >
               <option value="live">Live</option>
               <option value="draft">Draft</option>
               <option value="archived">Archived</option>
             </select>
           </div>
           <Input label="Price (USD)" type="number" value={String(p.price)} onChange={(v) => set("price", Number(v))} />
-          <Input label="Stock" type="number" value={String(p.stock)} onChange={(v) => set("stock", Number(v))} />
+          <Input label="Stock" type="number" value={String(p.stock ?? 0)} onChange={(v) => set("stock", Number(v))} />
+          <Input label="Cadence" value={p.cadence ?? ""} onChange={(v) => set("cadence", v)} />
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-border">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-border hover:bg-midnight">Cancel</button>
-          <button onClick={() => onSave(p)} className="px-4 py-2 text-sm bg-gold text-obsidian font-medium hover:bg-gold/90">Save</button>
+          <button
+            onClick={() => onSave(p)}
+            disabled={saving}
+            className="px-4 py-2 text-sm bg-gold text-obsidian font-medium hover:bg-gold/90 disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
     </div>

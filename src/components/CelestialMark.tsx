@@ -1,9 +1,9 @@
-import logoAsset from "@/assets/celestial-logo.png.asset.json";
+import celestialLogoUrl from "@/assets/celestial-logo.png";
 
 export function CelestialMark({ className = "" }: { className?: string }) {
   return (
     <img
-      src={logoAsset.url}
+      src={celestialLogoUrl}
       alt="Celestial logo"
       className={`object-contain ${className}`}
       draggable={false}

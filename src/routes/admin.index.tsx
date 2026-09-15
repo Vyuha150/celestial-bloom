@@ -1,20 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, DollarSign, ShoppingBag, Users, Package, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowUpRight, ArrowDownRight, DollarSign, ShoppingBag, Users, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from "recharts";
-import { adminOrders, revenueSeries, categoryMix, trafficSources } from "@/data/admin";
+import { getDashboard } from "@/admin/api";
 
 export const Route = createFileRoute("/admin/")({
   component: Dashboard,
 });
 
-const kpis = [
-  { label: "Revenue (30d)", value: "$57,140", delta: "+18.2%", icon: DollarSign },
-  { label: "Orders (30d)", value: "300", delta: "+12.4%", icon: ShoppingBag },
-  { label: "New Customers", value: "84", delta: "+22.7%", icon: Users },
-  { label: "Avg. Order Value", value: "$190.46", delta: "+5.1%", icon: TrendingUp },
-];
-
 function Dashboard() {
+  const { data, isLoading, error } = useQuery({ queryKey: ["admin", "dashboard"], queryFn: getDashboard });
+
+  if (isLoading) return <div className="text-sm text-muted-foreground">Loading dashboard…</div>;
+  if (error || !data) return <div className="text-sm text-rose-400">Failed to load dashboard data.</div>;
+
+  const kpis = [
+    { label: "Revenue (30d)", value: `$${data.kpis.revenue.value.toLocaleString()}`, delta: data.kpis.revenue.changePct, icon: DollarSign },
+    { label: "Orders (30d)", value: data.kpis.orders.value.toLocaleString(), delta: data.kpis.orders.changePct, icon: ShoppingBag },
+    { label: "New Customers", value: data.kpis.newCustomers.value.toLocaleString(), delta: data.kpis.newCustomers.changePct, icon: Users },
+    { label: "Avg. Order Value", value: `$${data.kpis.aov.value.toFixed(2)}`, delta: data.kpis.aov.changePct, icon: TrendingUp },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,6 +32,7 @@ function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => {
           const Icon = k.icon;
+          const up = k.delta >= 0;
           return (
             <div key={k.label} className="border border-border bg-midnight/40 p-5">
               <div className="flex items-center justify-between">
@@ -33,8 +40,9 @@ function Dashboard() {
                 <Icon className="size-4 text-gold" />
               </div>
               <p className="text-display text-3xl mt-3">{k.value}</p>
-              <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
-                <ArrowUpRight className="size-3" /> {k.delta} vs prev
+              <p className={`text-xs mt-1 flex items-center gap-1 ${up ? "text-emerald-400" : "text-rose-400"}`}>
+                {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+                {Math.abs(k.delta)}% vs prev
               </p>
             </div>
           );
@@ -48,48 +56,49 @@ function Dashboard() {
             <span className="text-xs text-muted-foreground">Weekly · USD</span>
           </div>
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueSeries}>
-                <defs>
-                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.72 0.12 75)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="oklch(0.72 0.12 75)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="oklch(0.28 0.02 270)" strokeDasharray="3 3" />
-                <XAxis dataKey="d" stroke="oklch(0.65 0.02 80)" fontSize={11} />
-                <YAxis stroke="oklch(0.65 0.02 80)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.18 0.03 270)",
-                    border: "1px solid oklch(0.28 0.02 270)",
-                    fontSize: 12,
-                  }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="oklch(0.72 0.12 75)" fill="url(#rev)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            {data.revenueTrend.length === 0 ? (
+              <EmptyState label="No orders yet in this window" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.revenueTrend}>
+                  <defs>
+                    <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="oklch(0.72 0.12 75)" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="oklch(0.72 0.12 75)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="oklch(0.28 0.02 270)" strokeDasharray="3 3" />
+                  <XAxis dataKey="d" stroke="oklch(0.65 0.02 80)" fontSize={11} />
+                  <YAxis stroke="oklch(0.65 0.02 80)" fontSize={11} />
+                  <Tooltip
+                    contentStyle={{ background: "oklch(0.18 0.03 270)", border: "1px solid oklch(0.28 0.02 270)", fontSize: 12 }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="oklch(0.72 0.12 75)" fill="url(#rev)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
         <div className="border border-border bg-midnight/40 p-5">
           <h3 className="text-display text-xl mb-4">Category mix</h3>
-          <div className="space-y-3">
-            {categoryMix.map((c) => (
-              <div key={c.name}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-foreground/90">{c.name}</span>
-                  <span className="text-muted-foreground">{c.value}%</span>
+          {data.categoryMix.length === 0 ? (
+            <EmptyState label="No sales yet" />
+          ) : (
+            <div className="space-y-3">
+              {data.categoryMix.map((c) => (
+                <div key={c.name}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-foreground/90">{c.name}</span>
+                    <span className="text-muted-foreground">{c.value}%</span>
+                  </div>
+                  <div className="h-1.5 bg-midnight border border-border overflow-hidden">
+                    <div className="h-full" style={{ width: `${c.value}%`, background: "var(--gradient-gold)" }} />
+                  </div>
                 </div>
-                <div className="h-1.5 bg-midnight border border-border overflow-hidden">
-                  <div
-                    className="h-full"
-                    style={{ width: `${c.value}%`, background: "var(--gradient-gold)" }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -101,46 +110,50 @@ function Dashboard() {
               View all <ArrowUpRight className="size-3" />
             </Link>
           </div>
-          <table className="w-full text-sm">
-            <thead className="text-xs text-muted-foreground border-b border-border">
-              <tr>
-                <th className="text-left font-normal px-5 py-3">Order</th>
-                <th className="text-left font-normal py-3">Customer</th>
-                <th className="text-left font-normal py-3">Status</th>
-                <th className="text-right font-normal px-5 py-3">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {adminOrders.slice(0, 6).map((o) => (
-                <tr key={o.id} className="border-b border-border/40 hover:bg-midnight/60">
-                  <td className="px-5 py-3 font-mono text-xs">{o.id}</td>
-                  <td className="py-3">{o.customer}</td>
-                  <td className="py-3"><StatusPill status={o.status} /></td>
-                  <td className="px-5 py-3 text-right">${o.total}</td>
+          {data.recentOrders.length === 0 ? (
+            <div className="p-5"><EmptyState label="No orders yet" /></div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-xs text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="text-left font-normal px-5 py-3">Order</th>
+                  <th className="text-left font-normal py-3">Customer</th>
+                  <th className="text-left font-normal py-3">Status</th>
+                  <th className="text-right font-normal px-5 py-3">Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.recentOrders.map((o) => (
+                  <tr key={o._id} className="border-b border-border/40 hover:bg-midnight/60">
+                    <td className="px-5 py-3 font-mono text-xs">{o.orderNumber}</td>
+                    <td className="py-3">{o.customerName}</td>
+                    <td className="py-3"><StatusPill status={o.status} /></td>
+                    <td className="px-5 py-3 text-right">${o.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="border border-border bg-midnight/40 p-5">
           <h3 className="text-display text-xl mb-4">Traffic sources</h3>
           <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trafficSources}>
-                <CartesianGrid stroke="oklch(0.28 0.02 270)" strokeDasharray="3 3" />
-                <XAxis dataKey="src" stroke="oklch(0.65 0.02 80)" fontSize={11} />
-                <YAxis stroke="oklch(0.65 0.02 80)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "oklch(0.18 0.03 270)",
-                    border: "1px solid oklch(0.28 0.02 270)",
-                    fontSize: 12,
-                  }}
-                />
-                <Bar dataKey="v" fill="oklch(0.72 0.12 75)" />
-              </BarChart>
-            </ResponsiveContainer>
+            {data.trafficSources.length === 0 ? (
+              <EmptyState label="No traffic recorded yet" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.trafficSources}>
+                  <CartesianGrid stroke="oklch(0.28 0.02 270)" strokeDasharray="3 3" />
+                  <XAxis dataKey="src" stroke="oklch(0.65 0.02 80)" fontSize={11} />
+                  <YAxis stroke="oklch(0.65 0.02 80)" fontSize={11} />
+                  <Tooltip
+                    contentStyle={{ background: "oklch(0.18 0.03 270)", border: "1px solid oklch(0.28 0.02 270)", fontSize: 12 }}
+                  />
+                  <Bar dataKey="v" fill="oklch(0.72 0.12 75)" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
@@ -148,10 +161,15 @@ function Dashboard() {
   );
 }
 
+function EmptyState({ label }: { label: string }) {
+  return <div className="h-full flex items-center justify-center text-xs text-muted-foreground">{label}</div>;
+}
+
 export function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     paid: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     shipped: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    delivered: "bg-blue-500/15 text-blue-300 border-blue-500/30",
     pending: "bg-amber-500/15 text-amber-300 border-amber-500/30",
     refunded: "bg-rose-500/15 text-rose-300 border-rose-500/30",
     cancelled: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",

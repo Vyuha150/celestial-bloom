@@ -1,5 +1,7 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Package, ShoppingBag, Users, BarChart3, FileText, Settings, Search } from "lucide-react";
+import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
+import { LayoutDashboard, Package, ShoppingBag, Users, BarChart3, FileText, Settings, Search, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import { isAuthenticated, getStoredUser, logout } from "@/admin/auth";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -24,6 +26,26 @@ const nav = [
 
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const [authChecked, setAuthChecked] = useState(false);
+  const isLoginPage = path === "/admin/login";
+
+  // Client-only guard: the access token lives in localStorage, which
+  // doesn't exist during SSR, so this intentionally runs after hydration
+  // rather than in a route `beforeLoad` (which would otherwise see every
+  // server-rendered pass as "logged out" and redirect real sessions too).
+  useEffect(() => {
+    if (isLoginPage) return;
+    if (!isAuthenticated()) {
+      void navigate({ to: "/admin/login" });
+      return;
+    }
+    setAuthChecked(true);
+  }, [isLoginPage, path, navigate]);
+
+  if (isLoginPage) return <Outlet />;
+  if (!authChecked) return null;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex">
@@ -75,8 +97,15 @@ function AdminLayout() {
                     className="bg-transparent outline-none w-64 placeholder:text-muted-foreground/70 text-foreground"
                   />
                 </div>
+                <button
+                  onClick={() => void logout().then(() => navigate({ to: "/admin/login" }))}
+                  title="Sign out"
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-midnight/60 border border-transparent hover:border-border"
+                >
+                  <LogOut className="size-4" />
+                </button>
                 <div className="size-8 rounded-full bg-gradient-to-br from-gold to-champagne text-obsidian text-xs flex items-center justify-center font-medium">
-                  EV
+                  {initials(getStoredUser()?.name)}
                 </div>
               </div>
             </div>
@@ -88,4 +117,10 @@ function AdminLayout() {
       </div>
     </div>
   );
+}
+
+function initials(name?: string): string {
+  if (!name) return "A";
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "A";
 }

@@ -1,10 +1,15 @@
 import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { GoldParticles } from "@/components/site/GoldParticles";
-import serum from "@/assets/p-luna-elixir.png.asset.json";
-import supplement from "@/assets/p-luminosity.png.asset.json";
-import essence from "@/assets/p-balance.png.asset.json";
-import nutrition from "@/assets/p-ritual-greens.png.asset.json";
+import serumUrl from "@/assets/p-luna-elixir.png";
+import supplementUrl from "@/assets/p-luminosity.png";
+import essenceUrl from "@/assets/p-balance.png";
+import nutritionUrl from "@/assets/p-ritual-greens.png";
+
+const serum = { url: serumUrl };
+const supplement = { url: supplementUrl };
+const essence = { url: essenceUrl };
+const nutrition = { url: nutritionUrl };
 
 type Scene = {
   word: string;

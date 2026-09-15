@@ -2,10 +2,14 @@ import { useRef, useState } from "react";
 import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { categories, findCategory, highlightsBySlug, type Category } from "@/data/products";
+import { getProducts, type ApiProduct } from "@/lib/shopApi";
 import { CelestialMark } from "@/components/CelestialMark";
 import { Turntable } from "@/components/product/Turntable";
+import { useCart } from "@/shop/useCart";
+import { CheckoutModal } from "@/shop/CheckoutModal";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: ({ params }) => {
@@ -46,9 +50,6 @@ const fadeUp = {
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
 
-function parsePrice(p: string) {
-  return Number(p.replace(/[^0-9.]/g, "")) || 0;
-}
 const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 const TABS = ["Description", "Ingredients", "How to take", "Lab reports", "FAQ"] as const;
@@ -158,24 +159,46 @@ function ProductDetailTabs({ cat }: { cat: Category }) {
   );
 }
 
-function PurchasePanel({ cat }: { cat: Category }) {
-
-  const packs = cat.tiers;
+function PurchasePanel({
+  cat,
+  products,
+  onAddToCart,
+  onBuyNow,
+  isBusy,
+}: {
+  cat: Category;
+  products: ApiProduct[] | undefined;
+  onAddToCart: (product: ApiProduct, qty: number) => void;
+  onBuyNow: (product: ApiProduct, qty: number) => void;
+  isBusy: boolean;
+}) {
+  const packs = products ?? [];
   const defaultIdx = Math.max(0, packs.findIndex((t) => t.highlight));
-  const [packIdx, setPackIdx] = useState(defaultIdx);
+  const [packIdx, setPackIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const pack = packs[packIdx];
-  const price = parsePrice(pack.price);
+  const pack = packs[Math.min(packIdx || defaultIdx, Math.max(packs.length - 1, 0))];
+  const price = pack?.price ?? 0;
   const list = Math.round(price * 1.15);
-  const off = Math.round(((list - price) / list) * 100);
+  const off = list > 0 ? Math.round(((list - price) / list) * 100) : 0;
   const total = price * qty;
+  const outOfStock = pack ? pack.stock <= 0 : false;
 
-  const addToCart = () => {
+  const handleAddToCart = () => {
+    if (!pack || outOfStock) return;
+    onAddToCart(pack, qty);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2200);
   };
+
+  if (packs.length === 0) {
+    return (
+      <div className="mx-auto mt-10 w-full max-w-6xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-10 text-center text-sm text-ivory/50">
+        Loading formulas…
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto mt-10 grid w-full max-w-6xl items-start gap-6 text-left lg:grid-cols-2">
@@ -207,10 +230,10 @@ function PurchasePanel({ cat }: { cat: Category }) {
         {/* Packs */}
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           {packs.map((t, i) => {
-            const active = i === packIdx;
+            const active = t._id === pack?._id;
             return (
               <button
-                key={t.name}
+                key={t._id}
                 type="button"
                 onClick={() => setPackIdx(i)}
                 aria-pressed={active}
@@ -221,7 +244,7 @@ function PurchasePanel({ cat }: { cat: Category }) {
                 }`}
               >
                 <div className="text-[9.5px] uppercase tracking-[0.25em] text-ivory/55">{t.name}</div>
-                <div className="mt-1.5 text-display text-lg text-ivory">{t.price}</div>
+                <div className="mt-1.5 text-display text-lg text-ivory">{fmt(t.price)}</div>
                 <div className="text-[10px] text-gold/80">{t.cadence}</div>
               </button>
             );
@@ -261,22 +284,25 @@ function PurchasePanel({ cat }: { cat: Category }) {
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={addToCart}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold/10"
+            onClick={handleAddToCart}
+            disabled={outOfStock || isBusy}
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold/10 disabled:opacity-50"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             {added ? "Added to cart" : "Add to cart"}
           </button>
-          <a
-            href="#allocate"
-            className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne"
+          <button
+            type="button"
+            disabled={outOfStock || isBusy || !pack}
+            onClick={() => pack && onBuyNow(pack, qty)}
+            className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne disabled:opacity-50"
           >
-            Buy it now →
-          </a>
+            {outOfStock ? "Out of stock" : "Buy it now →"}
+          </button>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
-          <span className="text-gold/80">Only 41 lots left in allocation</span>
+          <span className="text-gold/80">{pack ? `${pack.stock} lots left in allocation` : ""}</span>
           <span>Free worldwide delivery</span>
           <span>30-day protocol guarantee</span>
         </div>
@@ -286,16 +312,23 @@ function PurchasePanel({ cat }: { cat: Category }) {
 }
 
 function ProductHero({
-
   cat,
   idx,
   prev,
   next,
+  products,
+  onAddToCart,
+  onBuyNow,
+  isBusy,
 }: {
   cat: Category;
   idx: number;
   prev: Category;
   next: Category;
+  products: ApiProduct[] | undefined;
+  onAddToCart: (product: ApiProduct, qty: number) => void;
+  onBuyNow: (product: ApiProduct, qty: number) => void;
+  isBusy: boolean;
 }) {
   const stage = useRef<HTMLElement>(null);
   const mx = useMotionValue(0);
@@ -463,7 +496,7 @@ function ProductHero({
           </motion.div>
 
           <motion.div variants={fadeUp}>
-            <PurchasePanel cat={cat} />
+            <PurchasePanel cat={cat} products={products} onAddToCart={onAddToCart} onBuyNow={onBuyNow} isBusy={isBusy} />
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-5 text-[9px] tracking-[0.3em] text-ivory/40 uppercase">
@@ -498,6 +531,17 @@ function ProductPage() {
   const prev = categories[(idx - 1 + categories.length) % categories.length];
   const maxBar = Math.max(...cat.infographic.bars.map((b) => b.value));
 
+  const { data: products } = useQuery({ queryKey: ["products", cat.slug], queryFn: () => getProducts(cat.slug) });
+  const cart = useCart();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
+  const handleAddToCart = (product: ApiProduct, qty: number) => {
+    void cart.addToCart({ productId: product._id, qty });
+  };
+  const handleBuyNow = (product: ApiProduct, qty: number) => {
+    void cart.addToCart({ productId: product._id, qty }).then(() => setCheckoutOpen(true));
+  };
+
 
   return (
     <div className="min-h-screen bg-obsidian">
@@ -523,7 +567,16 @@ function ProductPage() {
       </header>
 
       {/* HERO */}
-      <ProductHero cat={cat} idx={idx} prev={prev} next={next} />
+      <ProductHero
+        cat={cat}
+        idx={idx}
+        prev={prev}
+        next={next}
+        products={products}
+        onAddToCart={handleAddToCart}
+        onBuyNow={handleBuyNow}
+        isBusy={cart.isAdding}
+      />
 
 
       {/* BENEFITS */}
@@ -713,9 +766,9 @@ function ProductPage() {
             variants={stagger}
             className="grid grid-cols-1 gap-6 md:grid-cols-3"
           >
-            {cat.tiers.map((t) => (
+            {(products ?? []).map((t) => (
               <motion.div
-                key={t.name}
+                key={t._id}
                 variants={fadeUp}
                 whileHover={{ y: -6 }}
                 className={`relative flex flex-col rounded-3xl border p-8 ${
@@ -731,7 +784,7 @@ function ProductPage() {
                 )}
                 <div className="text-eyebrow">{t.name}</div>
                 <div className="mt-5 flex items-baseline gap-2">
-                  <div className="text-display text-5xl text-ivory">{t.price}</div>
+                  <div className="text-display text-5xl text-ivory">{fmt(t.price)}</div>
                   <div className="text-[11px] uppercase tracking-[0.25em] text-ivory/50">{t.cadence}</div>
                 </div>
                 <div className="hairline my-7" />
@@ -744,13 +797,15 @@ function ProductPage() {
                   ))}
                 </ul>
                 <button
-                  className={`mt-10 rounded-full px-6 py-3.5 text-[10.5px] uppercase tracking-[0.3em] transition-all ${
+                  onClick={() => handleBuyNow(t, 1)}
+                  disabled={t.stock <= 0 || cart.isAdding}
+                  className={`mt-10 rounded-full px-6 py-3.5 text-[10.5px] uppercase tracking-[0.3em] transition-all disabled:opacity-50 ${
                     t.highlight
                       ? "bg-gold text-obsidian hover:bg-champagne"
                       : "border border-gold/60 text-gold hover:bg-gold hover:text-obsidian"
                   }`}
                 >
-                  {t.cta} →
+                  {t.stock <= 0 ? "Out of stock" : `${t.cta} →`}
                 </button>
               </motion.div>
             ))}
@@ -817,6 +872,8 @@ function ProductPage() {
           </Link>
         </div>
       </section>
+
+      {checkoutOpen && <CheckoutModal onClose={() => setCheckoutOpen(false)} />}
     </div>
   );
 }
