@@ -199,15 +199,15 @@ export function ProductJourney() {
 
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-[3%] z-[4] flex justify-center overflow-hidden"
+              className="pointer-events-none absolute inset-x-0 top-[11%] z-[4] flex justify-center overflow-hidden px-6 pt-2"
             >
               <span
                 data-word
                 className="block select-none whitespace-nowrap text-center text-display font-medium text-[#EFE6D4]/85 will-change-transform"
                 style={{
-                  fontSize: "clamp(2.2rem, 11vw, 11rem)",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 0.9,
+                  fontSize: "clamp(1.75rem, 7.2vw, 6.5rem)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
                 }}
               >
                 {s.word}
