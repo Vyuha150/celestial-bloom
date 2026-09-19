@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag, Heart, Share2 } from "lucide-react";
 
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
