@@ -311,7 +311,7 @@ function PurchasePanel({
   );
 }
 
-function HighlightRail({ highlights }: { highlights: { title: string; copy: string }[] }) {
+function HighlightRail({ highlights }: { highlights: { name: string; body: string }[] }) {
   const [active, setActive] = useState(0);
   if (!highlights.length) return null;
   const current = highlights[Math.min(active, highlights.length - 1)];
@@ -321,7 +321,7 @@ function HighlightRail({ highlights }: { highlights: { title: string; copy: stri
       <div className="flex items-stretch justify-center gap-2.5 overflow-x-auto pb-1">
         {highlights.map((h, i) => (
           <button
-            key={h.title}
+            key={h.name}
             type="button"
             onMouseEnter={() => setActive(i)}
             onClick={() => setActive(i)}
@@ -331,19 +331,19 @@ function HighlightRail({ highlights }: { highlights: { title: string; copy: stri
                 : "border-border bg-midnight/40 text-ivory/55 hover:border-gold/40 hover:text-ivory"
             }`}
           >
-            <div className="text-[9px] uppercase tracking-[0.22em] leading-tight">{h.title}</div>
+            <div className="text-[9px] uppercase tracking-[0.22em] leading-tight">{h.name}</div>
           </button>
         ))}
       </div>
 
       <motion.p
-        key={current.title}
+        key={current.name}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease }}
         className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-ivory/65"
       >
-        {current.copy}
+        {current.body}
       </motion.p>
     </div>
   );
