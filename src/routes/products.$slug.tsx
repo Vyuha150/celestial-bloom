@@ -381,107 +381,81 @@ function ProductHero({
         </motion.div>
 
         {/* Cursor-reactive stage */}
-        <div className="relative mt-10 flex items-center justify-center">
+        {/* Centred gallery stage */}
+        <div className="relative mx-auto mt-8 max-w-3xl">
+          <div className="absolute right-0 top-0 z-20 flex gap-2">
+            <button
+              type="button"
+              aria-label="Save to wishlist"
+              className="grid h-9 w-9 place-items-center rounded-full border border-gold/25 text-ivory/70 transition-colors hover:border-gold hover:text-gold"
+            >
+              <Heart className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Share this product"
+              className="grid h-9 w-9 place-items-center rounded-full border border-gold/25 text-ivory/70 transition-colors hover:border-gold hover:text-gold"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+          </div>
 
-
-
-          <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-8">
-            <div className="order-2 space-y-10 px-2 lg:order-1 lg:pl-16 lg:text-right">
-              {(highlightsBySlug[cat.slug] ?? []).slice(0, 3).map((h, i) => (
-                <motion.div
-                  key={h.name}
-                  initial={{ opacity: 0, x: -24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
-                >
-                  <div className="flex items-center gap-3 lg:justify-end">
-                    <span className="text-display text-xl text-champagne lg:order-1">{h.name}</span>
-                    <span className="hidden h-px w-8 bg-gold/50 lg:order-2 lg:block" />
-                  </div>
-                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div style={{ perspective: 1400 }} className="order-1 flex items-center justify-center lg:order-2">
-
+          <div style={{ perspective: 1400 }} className="flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
               style={cat.heroSprite ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
-              className="relative w-[min(440px,68vw)] will-change-transform"
+              className="relative w-[min(460px,72vw)] will-change-transform"
             >
-            <div
-              aria-hidden
-              className="absolute -inset-8 rounded-[3rem]"
-              style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
-            />
-            {cat.heroSprite ? (
-              <div className="relative mx-auto flex h-[min(489px,58vh)] w-full items-center justify-center">
-                {/* Soft light pool beneath the floating product — no plate, no white box */}
-                <div
-                  aria-hidden
-                  className="absolute inset-x-[12%] bottom-[6%] h-[22%] rounded-[50%]"
-                  style={{
-                    background:
-                      "radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--gold) 26%, transparent) 0%, transparent 72%)",
-                    filter: "blur(18px)",
-                  }}
-                />
-                <Turntable
-                  sprite={cat.heroSprite}
-                  label={cat.title}
-                  className="relative h-full aspect-[304/489]"
-                />
-              </div>
-            ) : cat.heroImage ? (
-              <img
-                src={cat.heroImage}
-                alt={cat.title}
-                className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain"
-                style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 50px color-mix(in oklab, var(--gold) 18%, transparent))" }}
+              <div
+                aria-hidden
+                className="absolute -inset-8 rounded-[3rem]"
+                style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
               />
-            ) : (
-              <img
-                src={cat.image}
-                alt={cat.title}
-                width={1024}
-                height={1024}
-                className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
-                style={{ boxShadow: "var(--shadow-gold)" }}
-              />
-            )}
+              {cat.heroSprite ? (
+                <div className="relative mx-auto flex h-[min(489px,58vh)] w-full items-center justify-center">
+                  <div
+                    aria-hidden
+                    className="absolute inset-x-[12%] bottom-[6%] h-[22%] rounded-[50%]"
+                    style={{
+                      background:
+                        "radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--gold) 26%, transparent) 0%, transparent 72%)",
+                      filter: "blur(18px)",
+                    }}
+                  />
+                  <Turntable sprite={cat.heroSprite} label={cat.title} className="relative h-full aspect-[304/489]" />
+                </div>
+              ) : cat.heroImage ? (
+                <img
+                  src={cat.heroImage}
+                  alt={cat.title}
+                  className="relative mx-auto h-[min(560px,64vh)] w-auto object-contain"
+                  style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6)) drop-shadow(0 0 50px color-mix(in oklab, var(--gold) 18%, transparent))" }}
+                />
+              ) : (
+                <img
+                  src={cat.image}
+                  alt={cat.title}
+                  width={1024}
+                  height={1024}
+                  className="relative aspect-square w-full rounded-[2rem] border border-gold/20 object-cover"
+                  style={{ boxShadow: "var(--shadow-gold)" }}
+                />
+              )}
             </motion.div>
-            </div>
-
-            <div className="order-3 space-y-10 px-2 lg:pr-16">
-              {(highlightsBySlug[cat.slug] ?? []).slice(3, 6).map((h, i) => (
-                <motion.div
-                  key={h.name}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.9, ease, delay: 0.25 + i * 0.12 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="hidden h-px w-8 bg-gold/50 lg:block" />
-                    <span className="text-display text-xl text-champagne">{h.name}</span>
-                  </div>
-                  <p className="mt-2 text-sm leading-relaxed text-ivory/65">{h.body}</p>
-                </motion.div>
-              ))}
-            </div>
           </div>
         </div>
 
-
         {cat.heroSprite && (
-          <div className="pointer-events-none mt-6 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
+          <div className="pointer-events-none mt-5 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
             <ChevronLeft className="h-3 w-3 animate-pulse" />
             Move cursor or drag to rotate
             <ChevronRight className="h-3 w-3 animate-pulse" />
           </div>
         )}
+
+        <HighlightRail highlights={highlightsBySlug[cat.slug] ?? []} />
 
         {/* Stable description */}
         <motion.div initial="hidden" animate="show" variants={stagger} className="mx-auto mt-12 max-w-6xl text-center">
