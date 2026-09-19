@@ -311,6 +311,44 @@ function PurchasePanel({
   );
 }
 
+function HighlightRail({ highlights }: { highlights: { title: string; copy: string }[] }) {
+  const [active, setActive] = useState(0);
+  if (!highlights.length) return null;
+  const current = highlights[Math.min(active, highlights.length - 1)];
+
+  return (
+    <div className="mx-auto mt-10 max-w-3xl">
+      <div className="flex items-stretch justify-center gap-2.5 overflow-x-auto pb-1">
+        {highlights.map((h, i) => (
+          <button
+            key={h.title}
+            type="button"
+            onMouseEnter={() => setActive(i)}
+            onClick={() => setActive(i)}
+            className={`min-w-[104px] flex-1 rounded-xl border px-2.5 py-3 text-center transition-all ${
+              i === active
+                ? "border-gold bg-gold/10 text-gold"
+                : "border-border bg-midnight/40 text-ivory/55 hover:border-gold/40 hover:text-ivory"
+            }`}
+          >
+            <div className="text-[9px] uppercase tracking-[0.22em] leading-tight">{h.title}</div>
+          </button>
+        ))}
+      </div>
+
+      <motion.p
+        key={current.title}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease }}
+        className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-ivory/65"
+      >
+        {current.copy}
+      </motion.p>
+    </div>
+  );
+}
+
 function ProductHero({
   cat,
   idx,
