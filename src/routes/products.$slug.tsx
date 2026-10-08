@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Shield as ShieldIcon, ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag, Heart, Share2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, Minus, Plus, ShoppingBag, Share2 } from "lucide-react";
 
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,12 @@ import { getProducts, type ApiProduct } from "@/lib/shopApi";
 import { CelestialMark } from "@/components/CelestialMark";
 import { Turntable } from "@/components/product/Turntable";
 import { useCart } from "@/shop/useCart";
-import { CheckoutModal } from "@/shop/CheckoutModal";
+import { openPanel } from "@/shop/cartUi";
+import { useRequireSignIn } from "@/shop/useRequireSignIn";
+import { ApiError } from "@/lib/apiClient";
+import { HeaderActions } from "@/components/site/HeaderActions";
+import { formatMoney } from "@/lib/money";
+import { AdminLink } from "@/components/site/AdminLink";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: ({ params }) => {
@@ -50,7 +55,7 @@ const fadeUp = {
 };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
 
-const fmt = (n: number) => `$${n.toLocaleString("en-US")}`;
+const fmt = formatMoney;
 
 const TABS = ["Description", "Ingredients", "How to take", "Lab reports", "FAQ"] as const;
 
@@ -168,34 +173,58 @@ function PurchasePanel({
 }: {
   cat: Category;
   products: ApiProduct[] | undefined;
-  onAddToCart: (product: ApiProduct, qty: number) => void;
-  onBuyNow: (product: ApiProduct, qty: number) => void;
+  onAddToCart: (product: ApiProduct, qty: number) => Promise<void>;
+  onBuyNow: (product: ApiProduct, qty: number) => Promise<void>;
   isBusy: boolean;
 }) {
   const packs = products ?? [];
-  const defaultIdx = Math.max(0, packs.findIndex((t) => t.highlight));
-  const [packIdx, setPackIdx] = useState(0);
+  // Shares the page's products query (same key) just to read its status.
+  const { isError, refetch } = useQuery({ queryKey: ["products", cat.slug], queryFn: () => getProducts(cat.slug) });
+  // null = nothing picked yet, so the highlighted pack is shown. A plain
+  // number can't express that: index 0 is a real choice, not "unset".
+  const [pickedId, setPickedId] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const pack = packs[Math.min(packIdx || defaultIdx, Math.max(packs.length - 1, 0))];
+  const pack = packs.find((t) => t._id === pickedId) ?? packs.find((t) => t.highlight) ?? packs[0];
   const price = pack?.price ?? 0;
-  const list = Math.round(price * 1.15);
-  const off = list > 0 ? Math.round(((list - price) / list) * 100) : 0;
-  const total = price * qty;
+  // Only show a struck-through price when the product really has a higher list price.
+  const list = pack?.compareAtPrice && pack.compareAtPrice > price ? pack.compareAtPrice : null;
+  const off = list ? Math.round(((list - price) / list) * 100) : 0;
+  const maxQty = Math.max(1, Math.min(9, pack?.stock ?? 1));
+  const safeQty = Math.min(qty, maxQty);
+  const total = price * safeQty;
   const outOfStock = pack ? pack.stock <= 0 : false;
 
-  const handleAddToCart = () => {
+  const run = async (action: (product: ApiProduct, qty: number) => Promise<void>) => {
     if (!pack || outOfStock) return;
-    onAddToCart(pack, qty);
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 2200);
+    setError(null);
+    try {
+      await action(pack, safeQty);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not add this to your bag. Please try again.");
+    }
   };
 
   if (packs.length === 0) {
     return (
       <div className="mx-auto mt-10 w-full max-w-6xl rounded-[1.75rem] border border-gold/20 bg-midnight/40 p-10 text-center text-sm text-ivory/50">
-        Loading formulas…
+        {isError ? (
+          <>
+            <p className="text-rose-300">We couldn't load prices for this collection.</p>
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              className="mt-5 rounded-full border border-gold/60 px-6 py-2.5 text-[10px] uppercase tracking-[0.3em] text-gold transition-colors hover:bg-gold hover:text-obsidian"
+            >
+              Try again
+            </button>
+          </>
+        ) : products ? (
+          "This collection isn't available to order yet."
+        ) : (
+          "Loading formulas…"
+        )}
       </div>
     );
   }
@@ -222,20 +251,27 @@ function PurchasePanel({
         {/* Price */}
         <div className="flex flex-wrap items-end gap-3">
           <span className="text-display text-4xl text-ivory">{fmt(price)}</span>
-          <span className="text-sm text-ivory/40 line-through">{fmt(list)}</span>
-          <span className="text-xs uppercase tracking-[0.25em] text-gold">{off}% off</span>
+          {list && (
+            <>
+              <span className="text-sm text-ivory/40 line-through">{fmt(list)}</span>
+              <span className="text-xs uppercase tracking-[0.25em] text-gold">{off}% off</span>
+            </>
+          )}
         </div>
         <p className="mt-1.5 text-[11px] text-ivory/45">Inclusive of duties, cold-chain delivery and lot certificate.</p>
 
         {/* Packs */}
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {packs.map((t, i) => {
+          {packs.map((t) => {
             const active = t._id === pack?._id;
             return (
               <button
                 key={t._id}
                 type="button"
-                onClick={() => setPackIdx(i)}
+                onClick={() => {
+                  setPickedId(t._id);
+                  setError(null);
+                }}
                 aria-pressed={active}
                 className={`rounded-2xl border px-4 py-3 text-left transition-all ${
                   active
@@ -259,17 +295,19 @@ function PurchasePanel({
               <button
                 type="button"
                 aria-label="Decrease quantity"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-                className="text-ivory/70 transition-colors hover:text-gold"
+                disabled={safeQty <= 1}
+                onClick={() => setQty(Math.max(1, safeQty - 1))}
+                className="text-ivory/70 transition-colors hover:text-gold disabled:opacity-30"
               >
                 <Minus className="h-3.5 w-3.5" />
               </button>
-              <span className="w-6 text-center text-sm text-ivory">{qty}</span>
+              <span className="w-6 text-center text-sm text-ivory">{safeQty}</span>
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQty((q) => Math.min(9, q + 1))}
-                className="text-ivory/70 transition-colors hover:text-gold"
+                disabled={safeQty >= maxQty}
+                onClick={() => setQty(Math.min(maxQty, safeQty + 1))}
+                className="text-ivory/70 transition-colors hover:text-gold disabled:opacity-30"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>
@@ -284,30 +322,76 @@ function PurchasePanel({
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <button
             type="button"
-            onClick={handleAddToCart}
+            onClick={() => void run(onAddToCart)}
             disabled={outOfStock || isBusy}
             className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/60 px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold/10 disabled:opacity-50"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
-            {added ? "Added to cart" : "Add to cart"}
+            {isBusy ? "Adding…" : "Add to cart"}
           </button>
           <button
             type="button"
             disabled={outOfStock || isBusy || !pack}
-            onClick={() => pack && onBuyNow(pack, qty)}
+            onClick={() => void run(onBuyNow)}
             className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-[10.5px] uppercase tracking-[0.3em] text-obsidian transition-all hover:bg-champagne disabled:opacity-50"
           >
             {outOfStock ? "Out of stock" : "Buy it now →"}
           </button>
         </div>
 
+        {error && (
+          <p role="alert" className="mt-3 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+            {error}
+          </p>
+        )}
+
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.25em] text-ivory/40">
-          <span className="text-gold/80">{pack ? `${pack.stock} lots left in allocation` : ""}</span>
+          <span className="text-gold/80">
+            {!pack ? "" : outOfStock ? "Currently out of stock" : `${pack.stock} lots left in allocation`}
+          </span>
           <span>Free worldwide delivery</span>
           <span>30-day protocol guarantee</span>
         </div>
       </div>
     </div>
+  );
+}
+
+// Uses the device's share sheet where there is one (phones), otherwise
+// copies the page link.
+function ShareButton({ title, text }: { title: string; text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const share = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `${title} — Celestial`, text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Share sheet dismissed or clipboard blocked — nothing to do.
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label="Share this product"
+      title={copied ? "Link copied" : "Share"}
+      onClick={() => void share()}
+      className="relative grid h-9 w-9 place-items-center rounded-full border border-gold/25 text-ivory/70 transition-colors hover:border-gold hover:text-gold"
+    >
+      <Share2 className="h-4 w-4" />
+      {copied && (
+        <span role="status" className="absolute right-0 top-full mt-2 whitespace-nowrap rounded-full bg-gold px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-obsidian">
+          Link copied
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -364,8 +448,8 @@ function ProductHero({
   prev: Category;
   next: Category;
   products: ApiProduct[] | undefined;
-  onAddToCart: (product: ApiProduct, qty: number) => void;
-  onBuyNow: (product: ApiProduct, qty: number) => void;
+  onAddToCart: (product: ApiProduct, qty: number) => Promise<void>;
+  onBuyNow: (product: ApiProduct, qty: number) => Promise<void>;
   isBusy: boolean;
 }) {
   const stage = useRef<HTMLElement>(null);
@@ -422,20 +506,7 @@ function ProductHero({
         {/* Centred gallery stage */}
         <div className="relative mx-auto mt-8 max-w-3xl">
           <div className="absolute right-0 top-0 z-20 flex gap-2">
-            <button
-              type="button"
-              aria-label="Save to wishlist"
-              className="grid h-9 w-9 place-items-center rounded-full border border-gold/25 text-ivory/70 transition-colors hover:border-gold hover:text-gold"
-            >
-              <Heart className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              aria-label="Share this product"
-              className="grid h-9 w-9 place-items-center rounded-full border border-gold/25 text-ivory/70 transition-colors hover:border-gold hover:text-gold"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
+            <ShareButton title={cat.title} text={cat.tagline} />
           </div>
 
           <div style={{ perspective: 1400 }} className="flex items-center justify-center">
@@ -545,13 +616,20 @@ function ProductPage() {
 
   const { data: products } = useQuery({ queryKey: ["products", cat.slug], queryFn: () => getProducts(cat.slug) });
   const cart = useCart();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  const handleAddToCart = (product: ApiProduct, qty: number) => {
-    void cart.addToCart({ productId: product._id, qty });
+  // Both reject on failure (e.g. out of stock) so the caller can show why.
+  // The bag/checkout overlays are rendered by <HeaderActions /> above.
+  // A signed-out visitor is sent to sign in first (and brought back here).
+  const requireSignIn = useRequireSignIn();
+  const handleAddToCart = async (product: ApiProduct, qty: number) => {
+    if (!requireSignIn()) return;
+    await cart.addToCart({ productId: product._id, qty });
+    openPanel("cart");
   };
-  const handleBuyNow = (product: ApiProduct, qty: number) => {
-    void cart.addToCart({ productId: product._id, qty }).then(() => setCheckoutOpen(true));
+  const handleBuyNow = async (product: ApiProduct, qty: number) => {
+    if (!requireSignIn()) return;
+    await cart.addToCart({ productId: product._id, qty });
+    openPanel("checkout");
   };
 
 
@@ -570,11 +648,11 @@ function ProductPage() {
             <Link to="/protocol" className="transition-colors hover:text-gold">Protocol</Link>
             <Link to="/universe" className="transition-colors hover:text-gold">Customization</Link>
             <Link to="/journal" className="transition-colors hover:text-gold">Journal</Link>
-          <Link to="/admin" title="Admin Panel" aria-label="Admin Panel" className="inline-flex items-center gap-1 transition-colors hover:text-gold"><ShieldIcon className="h-3.5 w-3.5" /></Link>
+          <AdminLink className="inline-flex items-center gap-1 transition-colors hover:text-gold" iconClassName="h-3.5 w-3.5" />
           </nav>
-          <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
-            Enter
-          </button>
+          <div className="flex items-center gap-5">
+            <HeaderActions />
+          </div>
         </div>
       </header>
 
@@ -809,7 +887,7 @@ function ProductPage() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => handleBuyNow(t, 1)}
+                  onClick={() => void handleBuyNow(t, 1).catch(() => openPanel("cart"))}
                   disabled={t.stock <= 0 || cart.isAdding}
                   className={`mt-10 rounded-full px-6 py-3.5 text-[10.5px] uppercase tracking-[0.3em] transition-all disabled:opacity-50 ${
                     t.highlight
@@ -884,8 +962,6 @@ function ProductPage() {
           </Link>
         </div>
       </section>
-
-      {checkoutOpen && <CheckoutModal onClose={() => setCheckoutOpen(false)} />}
     </div>
   );
 }

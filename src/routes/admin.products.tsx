@@ -14,6 +14,7 @@ import {
 } from "@/admin/api";
 import { API_URL } from "@/lib/apiClient";
 import { StatusPill } from "./admin.index";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/products")({
   component: ProductsAdmin,
@@ -166,7 +167,7 @@ function ProductsAdmin() {
                     <div className="text-xs text-muted-foreground font-mono">{p.sku}</div>
                   </td>
                   <td className="py-3">{categoryTitle(p)}</td>
-                  <td className="py-3">${p.price}</td>
+                  <td className="py-3">{formatMoney(p.price)}</td>
                   <td className="py-3">
                     <span className={p.stock === 0 ? "text-rose-400" : p.stock < 20 ? "text-amber-400" : ""}>{p.stock}</span>
                   </td>
@@ -281,7 +282,7 @@ function ProductDrawer({
               <option value="archived">Archived</option>
             </select>
           </div>
-          <Input label="Price (USD)" type="number" value={String(p.price)} onChange={(v) => set("price", Number(v))} />
+          <Input label="Price (INR)" type="number" value={String(p.price)} onChange={(v) => set("price", Number(v))} />
           <Input label="Stock" type="number" value={String(p.stock ?? 0)} onChange={(v) => set("stock", Number(v))} />
           <Input label="Cadence" value={p.cadence ?? ""} onChange={(v) => set("cadence", v)} />
         </div>

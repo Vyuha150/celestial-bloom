@@ -111,9 +111,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Single Lot", price: "$340", cadence: "/ one-time", perks: ["1 month supply", "Lot certificate", "Concierge onboarding"], cta: "Order single lot" },
-      { name: "Quarterly Protocol", price: "$890", cadence: "/ 90 days", highlight: true, perks: ["Save 13%", "Quarterly biomarker review", "Priority allocation", "Sleeve refill case"], cta: "Lock my protocol" },
-      { name: "Founder's Annual", price: "$3,200", cadence: "/ year", perks: ["Save 21%", "2 diagnostic kits included", "Private formulator hour", "Engraved aluminium vault"], cta: "Apply for allocation" },
+      { name: "Single Lot", price: "₹340", cadence: "/ one-time", perks: ["1 month supply", "Lot certificate", "Concierge onboarding"], cta: "Order single lot" },
+      { name: "Quarterly Protocol", price: "₹890", cadence: "/ 90 days", highlight: true, perks: ["Save 13%", "Quarterly biomarker review", "Priority allocation", "Sleeve refill case"], cta: "Lock my protocol" },
+      { name: "Founder's Annual", price: "₹3,200", cadence: "/ year", perks: ["Save 21%", "2 diagnostic kits included", "Private formulator hour", "Engraved aluminium vault"], cta: "Apply for allocation" },
     ],
     faqs: baseFaqs,
     social: {
@@ -165,9 +165,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Essential Three", price: "$220", cadence: "/ month", perks: ["C · Mg · D3+K2", "30-day supply", "Glass vessel"], cta: "Start essentials" },
-      { name: "Full Bio Stack", price: "$420", cadence: "/ month", highlight: true, perks: ["All 7 capsules", "Save 15%", "Travel sleeve", "Concierge"], cta: "Take the full stack" },
-      { name: "House Account", price: "$1,150", cadence: "/ quarter", perks: ["Save 22%", "Auto-replenish", "Lot pre-allocation"], cta: "Open house account" },
+      { name: "Essential Three", price: "₹220", cadence: "/ month", perks: ["C · Mg · D3+K2", "30-day supply", "Glass vessel"], cta: "Start essentials" },
+      { name: "Full Bio Stack", price: "₹420", cadence: "/ month", highlight: true, perks: ["All 7 capsules", "Save 15%", "Travel sleeve", "Concierge"], cta: "Take the full stack" },
+      { name: "House Account", price: "₹1,150", cadence: "/ quarter", perks: ["Save 22%", "Auto-replenish", "Lot pre-allocation"], cta: "Open house account" },
     ],
     faqs: baseFaqs,
     social: {
@@ -219,9 +219,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Single Tin", price: "$78", cadence: "/ tin", perks: ["30 servings", "Aluminium tin", "Aluminium scoop"], cta: "Order tin" },
-      { name: "Training Block", price: "$210", cadence: "/ 3 tins", highlight: true, perks: ["Save 10%", "Mix & match flavours", "Shaker included"], cta: "Build my block" },
-      { name: "Season Subscription", price: "$680", cadence: "/ 12 tins", perks: ["Save 18%", "Coach call (1hr)", "Refill cadence"], cta: "Lock my season" },
+      { name: "Single Tin", price: "₹78", cadence: "/ tin", perks: ["30 servings", "Aluminium tin", "Aluminium scoop"], cta: "Order tin" },
+      { name: "Training Block", price: "₹210", cadence: "/ 3 tins", highlight: true, perks: ["Save 10%", "Mix & match flavours", "Shaker included"], cta: "Build my block" },
+      { name: "Season Subscription", price: "₹680", cadence: "/ 12 tins", perks: ["Save 18%", "Coach call (1hr)", "Refill cadence"], cta: "Lock my season" },
     ],
     faqs: baseFaqs,
     social: {
@@ -273,9 +273,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Tasting Flight", price: "$96", cadence: "/ 12 bottles", perks: ["One of each", "Concierge guide", "Cold-chain shipping"], cta: "Order tasting flight" },
-      { name: "Weekly Ritual", price: "$240", cadence: "/ 36 bottles", highlight: true, perks: ["Curated selection", "Save 12%", "Recurring delivery"], cta: "Begin ritual" },
-      { name: "Cellar Subscription", price: "$820", cadence: "/ quarter", perks: ["Save 20%", "Private allocation", "Glass return programme"], cta: "Reserve cellar" },
+      { name: "Tasting Flight", price: "₹96", cadence: "/ 12 bottles", perks: ["One of each", "Concierge guide", "Cold-chain shipping"], cta: "Order tasting flight" },
+      { name: "Weekly Ritual", price: "₹240", cadence: "/ 36 bottles", highlight: true, perks: ["Curated selection", "Save 12%", "Recurring delivery"], cta: "Begin ritual" },
+      { name: "Cellar Subscription", price: "₹820", cadence: "/ quarter", perks: ["Save 20%", "Private allocation", "Glass return programme"], cta: "Reserve cellar" },
     ],
     faqs: baseFaqs,
     social: {
@@ -327,9 +327,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Sample Tin", price: "$58", cadence: "/ tin", perks: ["20 pieces · mixed", "Tin packaging", "Travel-friendly"], cta: "Try the tin" },
-      { name: "Monthly Box", price: "$160", cadence: "/ month", highlight: true, perks: ["Full daily dose", "Save 14%", "Refill subscription"], cta: "Start monthly box" },
-      { name: "Cabinet Stock", price: "$540", cadence: "/ quarter", perks: ["Save 22%", "Engraved aluminium tin", "Concierge"], cta: "Stock my cabinet" },
+      { name: "Sample Tin", price: "₹58", cadence: "/ tin", perks: ["20 pieces · mixed", "Tin packaging", "Travel-friendly"], cta: "Try the tin" },
+      { name: "Monthly Box", price: "₹160", cadence: "/ month", highlight: true, perks: ["Full daily dose", "Save 14%", "Refill subscription"], cta: "Start monthly box" },
+      { name: "Cabinet Stock", price: "₹540", cadence: "/ quarter", perks: ["Save 22%", "Engraved aluminium tin", "Concierge"], cta: "Stock my cabinet" },
     ],
     faqs: baseFaqs,
     social: {
@@ -381,9 +381,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Tasting Box", price: "$86", cadence: "/ box", perks: ["12 pieces curated", "Includes tasting notes"], cta: "Order tasting box" },
-      { name: "Weekly Pantry", price: "$220", cadence: "/ week", highlight: true, perks: ["Lunch + snack rotation", "Save 11%", "Cold-chain"], cta: "Stock my pantry" },
-      { name: "Concierge Pantry", price: "$760", cadence: "/ month", perks: ["Bespoke menu", "Private chef call", "Save 18%"], cta: "Book concierge" },
+      { name: "Tasting Box", price: "₹86", cadence: "/ box", perks: ["12 pieces curated", "Includes tasting notes"], cta: "Order tasting box" },
+      { name: "Weekly Pantry", price: "₹220", cadence: "/ week", highlight: true, perks: ["Lunch + snack rotation", "Save 11%", "Cold-chain"], cta: "Stock my pantry" },
+      { name: "Concierge Pantry", price: "₹760", cadence: "/ month", perks: ["Bespoke menu", "Private chef call", "Save 18%"], cta: "Book concierge" },
     ],
     faqs: baseFaqs,
     social: {
@@ -434,9 +434,9 @@ export const categories: Category[] = [
       ],
     },
     tiers: [
-      { name: "Single Panel", price: "$420", cadence: "/ test", perks: ["62 biomarkers", "Clinician PDF", "Stack recommendation"], cta: "Order panel" },
-      { name: "Quarterly Iteration", price: "$1,380", cadence: "/ year", highlight: true, perks: ["4 panels / yr", "Save 18%", "Live clinician hour"], cta: "Begin iteration" },
-      { name: "Concierge Protocol", price: "$4,400", cadence: "/ year", perks: ["Quarterly + microbiome", "Dedicated physician", "Stack supplied"], cta: "Apply for concierge" },
+      { name: "Single Panel", price: "₹420", cadence: "/ test", perks: ["62 biomarkers", "Clinician PDF", "Stack recommendation"], cta: "Order panel" },
+      { name: "Quarterly Iteration", price: "₹1,380", cadence: "/ year", highlight: true, perks: ["4 panels / yr", "Save 18%", "Live clinician hour"], cta: "Begin iteration" },
+      { name: "Concierge Protocol", price: "₹4,400", cadence: "/ year", perks: ["Quarterly + microbiome", "Dedicated physician", "Stack supplied"], cta: "Apply for concierge" },
     ],
     faqs: baseFaqs,
     social: {

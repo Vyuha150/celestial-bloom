@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, ArrowDownRight, DollarSign, ShoppingBag, Users, TrendingUp } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, IndianRupee, ShoppingBag, Users, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from "recharts";
 import { getDashboard } from "@/admin/api";
+import { formatMoney } from "@/lib/money";
 
 export const Route = createFileRoute("/admin/")({
   component: Dashboard,
@@ -15,10 +16,10 @@ function Dashboard() {
   if (error || !data) return <div className="text-sm text-rose-400">Failed to load dashboard data.</div>;
 
   const kpis = [
-    { label: "Revenue (30d)", value: `$${data.kpis.revenue.value.toLocaleString()}`, delta: data.kpis.revenue.changePct, icon: DollarSign },
+    { label: "Revenue (30d)", value: formatMoney(data.kpis.revenue.value), delta: data.kpis.revenue.changePct, icon: IndianRupee },
     { label: "Orders (30d)", value: data.kpis.orders.value.toLocaleString(), delta: data.kpis.orders.changePct, icon: ShoppingBag },
     { label: "New Customers", value: data.kpis.newCustomers.value.toLocaleString(), delta: data.kpis.newCustomers.changePct, icon: Users },
-    { label: "Avg. Order Value", value: `$${data.kpis.aov.value.toFixed(2)}`, delta: data.kpis.aov.changePct, icon: TrendingUp },
+    { label: "Avg. Order Value", value: formatMoney(data.kpis.aov.value), delta: data.kpis.aov.changePct, icon: TrendingUp },
   ];
 
   return (
@@ -53,7 +54,7 @@ function Dashboard() {
         <div className="lg:col-span-2 border border-border bg-midnight/40 p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-display text-xl">Revenue trend</h3>
-            <span className="text-xs text-muted-foreground">Weekly · USD</span>
+            <span className="text-xs text-muted-foreground">Weekly · INR</span>
           </div>
           <div className="h-72">
             {data.revenueTrend.length === 0 ? (
@@ -128,7 +129,7 @@ function Dashboard() {
                     <td className="px-5 py-3 font-mono text-xs">{o.orderNumber}</td>
                     <td className="py-3">{o.customerName}</td>
                     <td className="py-3"><StatusPill status={o.status} /></td>
-                    <td className="px-5 py-3 text-right">${o.total}</td>
+                    <td className="px-5 py-3 text-right">{formatMoney(o.total)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -168,6 +169,7 @@ function EmptyState({ label }: { label: string }) {
 export function StatusPill({ status }: { status: string }) {
   const map: Record<string, string> = {
     paid: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+    confirmed: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
     shipped: "bg-blue-500/15 text-blue-300 border-blue-500/30",
     delivered: "bg-blue-500/15 text-blue-300 border-blue-500/30",
     pending: "bg-amber-500/15 text-amber-300 border-amber-500/30",

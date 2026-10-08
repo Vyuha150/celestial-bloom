@@ -1,8 +1,9 @@
-import { Shield as ShieldIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { categories } from "@/data/products";
 import { CelestialMark } from "@/components/CelestialMark";
+import { HeaderActions } from "@/components/site/HeaderActions";
+import { AdminLink } from "@/components/site/AdminLink";
 
 export const Route = createFileRoute("/brand-new")({
   head: () => ({
@@ -40,9 +41,9 @@ const newLaunches = [
     cat: categories[3], // beverages
     productName: "NMN Longevity Elixir — 2026 Reformulation",
     badge: "Just Launched",
-    price: "$240",
-    was: "$280",
-    save: "Save $40",
+    price: "₹240",
+    was: "₹280",
+    save: "Save ₹40",
     blurb:
       "300 mg pharmaceutical-grade NMN, stabilised in a citrate matrix. Cold-chain glass. Allocations open this week.",
     chips: ["Glass only", "300mg / serving", "Cold-chain"],
@@ -51,9 +52,9 @@ const newLaunches = [
     cat: categories[4], // gummies
     productName: "NAD+ Longevity Gummy — Black Fig",
     badge: "New Flavour",
-    price: "$160",
-    was: "$190",
-    save: "Save $30",
+    price: "₹160",
+    was: "₹190",
+    save: "Save ₹30",
     blurb:
       "Same 250 mg NAD+ dose, now in a sugar-free Michelin-developed black fig gummy. First production run is 4,000 tins.",
     chips: ["250mg NAD+", "0g sugar", "Pectin base"],
@@ -62,9 +63,9 @@ const newLaunches = [
     cat: categories[1], // bio
     productName: "Liposomal Vitamin C — Phospholipid v.4",
     badge: "Updated Formula",
-    price: "$95",
-    was: "$120",
-    save: "Save $25",
+    price: "₹95",
+    was: "₹120",
+    save: "Save ₹25",
     blurb:
       "New 120 nm liposomal envelope pushes cellular uptake to 94%. The most absorbable vitamin C we've ever shipped.",
     chips: ["94% uptake", "120nm particle", "30-day supply"],
@@ -73,9 +74,9 @@ const newLaunches = [
     cat: categories[6], // diagnostic
     productName: "At-Home 62-Biomarker Kit",
     badge: "New Kit",
-    price: "$320",
-    was: "$420",
-    save: "Save $100",
+    price: "₹320",
+    was: "₹420",
+    save: "Save ₹100",
     blurb:
       "Quarterly bloodwork, mailed in a chilled aluminium case. 48 h turnaround, clinician review included.",
     chips: ["62 biomarkers", "48h results", "Clinician 1:1"],
@@ -88,7 +89,7 @@ const bestBuys = [
     cat: categories[0],
     productName: "Quarterly Performance Protocol",
     rating: "4.9 ★ (2,184)",
-    price: "$890",
+    price: "₹890",
     cadence: "/ 90 days",
     save: "Save 13%",
     blurb:
@@ -98,7 +99,7 @@ const bestBuys = [
     cat: categories[2],
     productName: "Training Block — 3-Tin Bundle",
     rating: "4.8 ★ (1,420)",
-    price: "$210",
+    price: "₹210",
     cadence: "/ 3 tins",
     save: "Save 10%",
     blurb:
@@ -108,7 +109,7 @@ const bestBuys = [
     cat: categories[5],
     productName: "Weekly Pantry — Chef Box",
     rating: "4.9 ★ (980)",
-    price: "$220",
+    price: "₹220",
     cadence: "/ week",
     save: "Save 11%",
     blurb:
@@ -141,11 +142,11 @@ function BrandNewPage() {
             <Link to="/protocol" className="transition-colors hover:text-gold">Protocol</Link>
             <Link to="/universe" className="transition-colors hover:text-gold">Customization</Link>
             <Link to="/journal" className="transition-colors hover:text-gold">Journal</Link>
-          <Link to="/admin" title="Admin Panel" aria-label="Admin Panel" className="inline-flex items-center gap-1 transition-colors hover:text-gold"><ShieldIcon className="h-3.5 w-3.5" /></Link>
+          <AdminLink className="inline-flex items-center gap-1 transition-colors hover:text-gold" iconClassName="h-3.5 w-3.5" />
           </nav>
-          <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
-            Enter
-          </button>
+          <div className="flex items-center gap-5">
+            <HeaderActions />
+          </div>
         </div>
       </header>
 

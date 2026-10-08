@@ -112,9 +112,13 @@ function UniversePage() {
                     </li>
                   ))}
                 </ul>
-                <button className="mt-10 rounded-full border border-gold/60 px-7 py-3 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
+                <Link
+                  to="/products/$slug"
+                  params={{ slug: c.slug }}
+                  className="mt-10 inline-block rounded-full border border-gold/60 px-7 py-3 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian"
+                >
                   Request Allocation →
-                </button>
+                </Link>
               </div>
             </motion.section>
           ))}

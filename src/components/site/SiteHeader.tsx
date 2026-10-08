@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search, User, ShoppingBag, Shield } from "lucide-react";
 import { CelestialMark } from "@/components/CelestialMark";
+import { HeaderActions } from "./HeaderActions";
+import { AdminLink } from "./AdminLink";
 
 const NAV = [
   { label: "Philosophy", to: "/protocol" },
   { label: "Science", to: "/science" },
   { label: "Collections", to: "/products" },
   { label: "Journal", to: "/journal" },
-  { label: "Contact", to: "/universe" },
+  { label: "Contact", to: "/contact" },
 ] as const;
 
 export function SiteHeader() {
@@ -48,19 +49,8 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-5">
-          <button aria-label="Search" className="text-ivory/60 transition-colors hover:text-gold">
-            <Search className="h-[15px] w-[15px]" />
-          </button>
-          <button aria-label="Account" className="hidden text-ivory/60 transition-colors hover:text-gold sm:block">
-            <User className="h-[15px] w-[15px]" />
-          </button>
-          <button aria-label="Bag" className="relative text-ivory/60 transition-colors hover:text-gold">
-            <ShoppingBag className="h-[15px] w-[15px]" />
-            <span className="absolute -right-1.5 -top-1.5 text-[8px] text-gold">0</span>
-          </button>
-          <Link to="/admin" aria-label="Admin panel" className="text-ivory/40 transition-colors hover:text-gold">
-            <Shield className="h-[14px] w-[14px]" />
-          </Link>
+          <HeaderActions />
+          <AdminLink className="text-ivory/40 transition-colors hover:text-gold" iconClassName="h-[14px] w-[14px]" />
           <Link
             to="/products"
             data-cursor="Explore"

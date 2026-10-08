@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Package, ShoppingBag, Users, BarChart3, FileText, Settings, Search, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
+import { LayoutDashboard, Package, ShoppingBag, Users, BarChart3, Settings, Search, LogOut, Store, Inbox } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { isAuthenticated, getStoredUser, logout } from "@/admin/auth";
+import { rememberReturnPath } from "@/shop/auth";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -19,8 +20,8 @@ const nav = [
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/messages", label: "Messages", icon: Inbox },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/admin/pages", label: "Pages / CMS", icon: FileText },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -37,7 +38,10 @@ function AdminLayout() {
   useEffect(() => {
     if (isLoginPage) return;
     if (!isAuthenticated()) {
-      void navigate({ to: "/admin/login" });
+      // Not an admin (or not signed in): send them to the one sign-in page,
+      // and bring an admin back here afterwards.
+      rememberReturnPath(path);
+      void navigate({ to: "/account" });
       return;
     }
     setAuthChecked(true);
@@ -98,15 +102,13 @@ function AdminLayout() {
                   />
                 </div>
                 <button
-                  onClick={() => void logout().then(() => navigate({ to: "/admin/login" }))}
+                  onClick={() => void logout().then(() => navigate({ to: "/account" }))}
                   title="Sign out"
                   className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-midnight/60 border border-transparent hover:border-border"
                 >
                   <LogOut className="size-4" />
                 </button>
-                <div className="size-8 rounded-full bg-gradient-to-br from-gold to-champagne text-obsidian text-xs flex items-center justify-center font-medium">
-                  {initials(getStoredUser()?.name)}
-                </div>
+                <ProfileMenu onSignOut={() => void logout().then(() => navigate({ to: "/account" }))} />
               </div>
             </div>
           </header>
@@ -115,6 +117,75 @@ function AdminLayout() {
           </main>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProfileMenu({ onSignOut }: { onSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const user = getStoredUser();
+
+  // Close on outside click or Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={wrap} className="relative">
+      <button
+        type="button"
+        aria-label="Account menu"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="size-8 rounded-full bg-gradient-to-br from-gold to-champagne text-obsidian text-xs flex items-center justify-center font-medium hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+      >
+        {initials(user?.name)}
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-full mt-2 w-60 border border-border bg-background shadow-xl z-20">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-sm text-foreground truncate">{user?.name ?? "Admin"}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <p className="text-eyebrow mt-2">Administrator</p>
+          </div>
+          <Link
+            to="/admin/settings"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-midnight/60"
+          >
+            <Settings className="size-4" /> Settings
+          </Link>
+          <Link
+            to="/"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-midnight/60"
+          >
+            <Store className="size-4" /> View storefront
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={onSignOut}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-midnight/60 border-t border-border"
+          >
+            <LogOut className="size-4" /> Sign out
+          </button>
+        </div>
+      )}
     </div>
   );
 }

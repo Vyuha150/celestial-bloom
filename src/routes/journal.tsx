@@ -1,4 +1,3 @@
-import { Shield as ShieldIcon } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { CelestialMark } from "@/components/CelestialMark";
@@ -9,6 +8,9 @@ import catBio from "@/assets/cat-bio.jpg";
 import catLuxury from "@/assets/cat-luxury.jpg";
 import catPowders from "@/assets/cat-powders.jpg";
 import catDiagnostic from "@/assets/cat-diagnostic.jpg";
+import { HeaderActions } from "@/components/site/HeaderActions";
+import { NewsletterForm } from "@/components/site/NewsletterForm";
+import { AdminLink } from "@/components/site/AdminLink";
 
 export const Route = createFileRoute("/journal")({
   head: () => ({
@@ -52,11 +54,11 @@ function Nav() {
           <Link to="/protocol" className="transition-colors hover:text-gold">Protocol</Link>
           <Link to="/universe" className="transition-colors hover:text-gold">Customization</Link>
           <Link to="/journal" className="text-gold">Journal</Link>
-          <Link to="/admin" title="Admin Panel" aria-label="Admin Panel" className="inline-flex items-center gap-1 transition-colors hover:text-gold"><ShieldIcon className="h-3.5 w-3.5" /></Link>
+          <AdminLink className="inline-flex items-center gap-1 transition-colors hover:text-gold" iconClassName="h-3.5 w-3.5" />
         </nav>
-        <button className="rounded-full border border-gold/60 px-5 py-2 text-[10px] uppercase tracking-[0.3em] text-gold transition-all hover:bg-gold hover:text-obsidian">
-          Enter
-        </button>
+        <div className="flex items-center gap-5">
+          <HeaderActions />
+        </div>
       </div>
     </header>
   );
@@ -317,13 +319,15 @@ function JournalPage() {
           <p className="mt-5 text-sm leading-relaxed text-ivory/65">
             One essay. One lab report. One field note. No marketing.
           </p>
-          <div className="mx-auto mt-9 flex max-w-md border-b border-gold/40">
-            <input
-              type="email"
+          <div className="mx-auto mt-9 max-w-md">
+            <NewsletterForm
+              source="journal"
               placeholder="your@private.email"
-              className="flex-1 bg-transparent py-3 text-sm text-ivory placeholder:text-ivory/30 outline-none"
+              buttonLabel="Join →"
+              className="flex border-b border-gold/40"
+              inputClassName="flex-1 bg-transparent py-3 text-sm text-ivory placeholder:text-ivory/30 outline-none"
+              buttonClassName="text-[10px] uppercase tracking-[0.3em] text-gold"
             />
-            <button className="text-[10px] uppercase tracking-[0.3em] text-gold">Join →</button>
           </div>
         </div>
       </section>

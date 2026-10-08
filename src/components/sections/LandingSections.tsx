@@ -393,7 +393,7 @@ export function FeaturedProduct() {
         <p className="mt-4 max-w-md text-sm text-ivory/60">
           A structured sensory signature — resin, iris and cold mineral air, held in faceted crystal.
         </p>
-        <p className="mt-6 text-display text-2xl text-champagne">$385</p>
+        <p className="mt-6 text-display text-2xl text-champagne">₹385</p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
           <Link
             ref={cta}
@@ -404,9 +404,13 @@ export function FeaturedProduct() {
           >
             Discover the Formula
           </Link>
-          <button className="bg-champagne px-8 py-3.5 text-[10px] uppercase tracking-[0.3em] text-obsidian transition-opacity hover:opacity-85">
-            Add to Collection
-          </button>
+          <Link
+            to="/products/$slug"
+            params={{ slug: "luxury-ready-to-consume" }}
+            className="bg-champagne px-8 py-3.5 text-[10px] uppercase tracking-[0.3em] text-obsidian transition-opacity hover:opacity-85"
+          >
+            Shop the Collection
+          </Link>
         </div>
       </div>
     </section>

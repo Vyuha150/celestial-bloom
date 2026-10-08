@@ -80,6 +80,17 @@ export function uploadProductImages(id: string, files: File[]): Promise<AdminPro
 // ---- Orders ----
 export type AdminOrderItem = { product: string; name: string; category: string; price: number; qty: number; lineTotal: number };
 export type OrderTracking = { carrier?: string; trackingNumber?: string; trackingUrl?: string; shippedAt?: string; deliveredAt?: string };
+export type ReturnRequest = {
+  status?: "requested" | "approved" | "rejected" | "received" | "refunded";
+  reason?: string;
+  adminNote?: string;
+  requestedAt?: string;
+  decidedAt?: string;
+  receivedAt?: string;
+  refundedAt?: string;
+};
+export type ReturnAction = "approve" | "reject" | "received" | "refund";
+
 export type AdminOrder = {
   _id: string;
   orderNumber: string;
@@ -88,14 +99,17 @@ export type AdminOrder = {
   items: AdminOrderItem[];
   itemCount: number;
   total: number;
-  status: "pending" | "paid" | "shipped" | "delivered" | "refunded" | "cancelled";
+  status: "pending" | "confirmed" | "paid" | "shipped" | "delivered" | "refunded" | "cancelled";
   paymentStatus: string;
+  paymentMethod?: "razorpay" | "cod";
   tracking?: OrderTracking;
+  returnRequest?: ReturnRequest;
   createdAt: string;
 };
 
-export function listOrders(params: { page?: number; limit?: number; status?: string; search?: string } = {}) {
-  return adminFetch<Paginated<AdminOrder>>(`/admin/orders${toQueryString(params)}`);
+export function listOrders(params: { page?: number; limit?: number; status?: string; search?: string; returns?: "open" | "any" } = {}) {
+  // openReturns = return requests still waiting on the store, across all orders.
+  return adminFetch<Paginated<AdminOrder> & { openReturns: number }>(`/admin/orders${toQueryString(params)}`);
 }
 
 export function getOrder(id: string): Promise<AdminOrder> {
@@ -104,6 +118,10 @@ export function getOrder(id: string): Promise<AdminOrder> {
 
 export function updateOrderStatus(id: string, status: AdminOrder["status"], note?: string): Promise<AdminOrder> {
   return adminFetch(`/admin/orders/${id}/status`, { method: "PATCH", body: { status, note } });
+}
+
+export function updateOrderReturn(id: string, action: ReturnAction, note?: string): Promise<AdminOrder> {
+  return adminFetch(`/admin/orders/${id}/return`, { method: "PATCH", body: { action, note: note || undefined } });
 }
 
 export function deleteOrder(id: string): Promise<void> {
@@ -124,6 +142,7 @@ export type AdminCustomer = {
   name: string;
   email: string;
   tier: "Founder" | "Member" | "Trial";
+  role: "admin" | "customer";
   createdAt: string;
   orders: number;
   lifetime: number;
@@ -133,11 +152,18 @@ export function listCustomers(params: { page?: number; limit?: number; search?: 
   return adminFetch<Paginated<AdminCustomer>>(`/admin/customers${toQueryString(params)}`);
 }
 
-export function getCustomer(id: string): Promise<{ customer: AdminCustomer; orders: AdminOrder[] }> {
+export type AdminCustomerCart = {
+  items: { product: string; name: string; categoryTitle: string; qty: number; price: number; lineTotal: number }[];
+  itemCount: number;
+  subtotal: number;
+  updatedAt: string;
+};
+
+export function getCustomer(id: string): Promise<{ customer: AdminCustomer; orders: AdminOrder[]; cart: AdminCustomerCart | null }> {
   return adminFetch(`/admin/customers/${id}`);
 }
 
-export function updateCustomer(id: string, body: Partial<Pick<AdminCustomer, "name" | "tier">>): Promise<AdminCustomer> {
+export function updateCustomer(id: string, body: Partial<Pick<AdminCustomer, "name" | "tier" | "role">>): Promise<AdminCustomer> {
   return adminFetch(`/admin/customers/${id}`, { method: "PATCH", body });
 }
 
@@ -145,41 +171,64 @@ export function deleteCustomer(id: string): Promise<void> {
   return adminFetch(`/admin/customers/${id}`, { method: "DELETE" });
 }
 
-// ---- Content (CMS pages) ----
-export type AdminPage = { _id: string; slug: string; title: string; route: string; status: "published" | "draft"; updatedAt: string };
-export type PageInput = { slug: string; title: string; route: string; status: "published" | "draft" };
+// ---- Contact messages ----
+export type ContactMessage = { _id: string; name: string; email: string; subject: string; message: string; handled: boolean; createdAt: string };
 
-export function listPages(): Promise<AdminPage[]> {
-  return adminFetch("/admin/content/pages");
+export function listMessages(): Promise<{ messages: ContactMessage[]; unhandled: number }> {
+  return adminFetch("/admin/messages");
 }
 
-export function createPage(body: PageInput): Promise<AdminPage> {
-  return adminFetch("/admin/content/pages", { method: "POST", body });
+export function setMessageHandled(id: string, handled: boolean): Promise<ContactMessage> {
+  return adminFetch(`/admin/messages/${id}`, { method: "PATCH", body: { handled } });
 }
 
-export function updatePage(slug: string, body: Partial<PageInput>): Promise<AdminPage> {
-  return adminFetch(`/admin/content/pages/${slug}`, { method: "PATCH", body });
-}
-
-export function deletePage(slug: string): Promise<void> {
-  return adminFetch(`/admin/content/pages/${slug}`, { method: "DELETE" });
+export function deleteMessage(id: string): Promise<void> {
+  return adminFetch(`/admin/messages/${id}`, { method: "DELETE" });
 }
 
 // ---- Settings ----
+export type StoreFeatures = { maintenance: boolean; cod: boolean; abandonedCart: boolean; referrals: boolean; transactionalEmails: boolean };
+
 export type StoreSettings = {
   storeName: string;
+  // Read-only: payments are taken in INR.
   currency: string;
   supportEmail: string;
   timezone: string;
-  features: { maintenance: boolean; abandonedCart: boolean; referrals: boolean; transactionalEmails: boolean };
+  // Days after delivery a customer may request a return; 0 = returns off.
+  returnWindowDays: number;
+  features: StoreFeatures;
+  // Read-only facts about the server, shown alongside the switches.
+  email: { configured: boolean; from: string | null };
+  abandonedCartDelayMinutes: number;
+  referralDiscountPercent: number;
+  subscribers: number;
+};
+
+export type SettingsUpdate = {
+  storeName?: string;
+  supportEmail?: string;
+  timezone?: string;
+  returnWindowDays?: number;
+  features?: Partial<StoreFeatures>;
 };
 
 export function getSettings(): Promise<StoreSettings> {
   return adminFetch("/admin/settings");
 }
 
-export function updateSettings(body: Partial<StoreSettings>): Promise<StoreSettings> {
+export function updateSettings(body: SettingsUpdate): Promise<StoreSettings> {
   return adminFetch("/admin/settings", { method: "PATCH", body });
+}
+
+export function sendTestEmail(to?: string): Promise<{ sent: true; to: string }> {
+  return adminFetch("/admin/settings/test-email", { method: "POST", body: to ? { to } : {} });
+}
+
+export type Subscriber = { _id: string; email: string; source: string; createdAt: string };
+
+export function listSubscribers(): Promise<Subscriber[]> {
+  return adminFetch("/admin/settings/subscribers");
 }
 
 // ---- Analytics ----

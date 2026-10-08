@@ -4,9 +4,15 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { apiFetch } from "@/lib/apiClient";
+import { useStoreSettings } from "@/lib/storeSettings";
+import { REFERRAL_STORAGE_KEY } from "@/shop/referral";
 
 import appCss from "../styles.css?url";
 
@@ -32,7 +38,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -113,12 +119,76 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Reports each storefront page view to the API — this is what feeds the
+// admin console's traffic-source and funnel analytics. Admin pages aren't
+// counted, and a failed report is ignored: analytics must never break a page.
+function PageViewTracker() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    const params = new URLSearchParams(window.location.search);
+    // Arrived through a friend's referral link (?ref=CODE) — keep the code so
+    // checkout can offer it, even if they browse for a while first.
+    const ref = params.get("ref");
+    if (ref && /^[A-Za-z0-9]{4,20}$/.test(ref)) {
+      try {
+        localStorage.setItem(REFERRAL_STORAGE_KEY, ref.toUpperCase());
+      } catch {
+        // Storage unavailable (private mode) — they can still type the code.
+      }
+    }
+    const utmSource = params.get("utm_source") ?? undefined;
+    // A referrer on our own site (e.g. after a reload) isn't a traffic source.
+    const external = document.referrer && !document.referrer.startsWith(window.location.origin);
+    void apiFetch("/track/pageview", {
+      method: "POST",
+      body: { path: pathname, referrer: external ? document.referrer : undefined, utmSource },
+    }).catch(() => {});
+  }, [pathname]);
+
+  return null;
+}
+
+// While maintenance mode is on (Admin → Settings), every storefront page is
+// replaced by a holding page. The admin console stays reachable so the
+// store can be reopened.
+function MaintenanceGate({ children }: { children: React.ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { maintenance, storeName, supportEmail } = useStoreSettings();
+
+  if (!maintenance || pathname.startsWith("/admin")) return <>{children}</>;
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-obsidian px-6 text-center text-ivory">
+      <div className="max-w-md">
+        <p className="text-[13px] tracking-[0.42em] text-gold">{storeName.toUpperCase()}</p>
+        <h1 className="text-display mt-8 text-4xl">We'll be back shortly</h1>
+        <p className="mt-5 text-sm leading-relaxed text-ivory/60">
+          The store is closed for a short while as we make some improvements. Please check back soon.
+        </p>
+        {supportEmail && (
+          <p className="mt-6 text-xs text-ivory/50">
+            Need help with an order?{" "}
+            <a href={`mailto:${supportEmail}`} className="text-gold underline-offset-4 hover:underline">
+              {supportEmail}
+            </a>
+          </p>
+        )}
+      </div>
+    </main>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <PageViewTracker />
+      <MaintenanceGate>
+        <Outlet />
+      </MaintenanceGate>
     </QueryClientProvider>
   );
 }

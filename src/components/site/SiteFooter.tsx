@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { CelestialMark } from "@/components/CelestialMark";
+import { useStoreSettings } from "@/lib/storeSettings";
+import { NewsletterForm } from "./NewsletterForm";
 
 const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
@@ -21,13 +23,15 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
     title: "Client",
     links: [
-      { label: "Concierge", to: "/universe" },
-      { label: "Admin Panel", to: "/admin" },
+      { label: "Contact", to: "/contact" },
+      { label: "Your account", to: "/account" },
     ],
   },
 ];
 
 export function SiteFooter() {
+  const { storeName, supportEmail } = useStoreSettings();
+
   return (
     <footer id="contact" className="border-t border-gold/12 bg-obsidian pb-12 pt-20">
       <div className="mx-auto max-w-[1440px] px-6 md:px-10">
@@ -41,21 +45,22 @@ export function SiteFooter() {
               Scientifically extracted formulations for those who intend to flourish, not merely
               sustain.
             </p>
-            <form
-              className="mt-8 flex max-w-sm items-center border-b border-gold/25 pb-2"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <label htmlFor="footer-email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="footer-email"
-                type="email"
-                placeholder="Email address"
-                className="w-full bg-transparent text-xs text-ivory placeholder:text-ivory/30 focus:outline-none"
+            <div className="mt-8 max-w-sm">
+              <NewsletterForm
+                source="footer"
+                className="flex items-center border-b border-gold/25 pb-2"
+                inputClassName="w-full bg-transparent text-xs text-ivory placeholder:text-ivory/30 focus:outline-none"
+                buttonClassName="text-[10px] uppercase tracking-[0.28em] text-gold"
               />
-              <button className="text-[10px] uppercase tracking-[0.28em] text-gold">Join</button>
-            </form>
+            </div>
+            {supportEmail && (
+              <p className="mt-6 text-xs text-ivory/45">
+                Support:{" "}
+                <a href={`mailto:${supportEmail}`} className="text-ivory/70 transition-colors hover:text-gold">
+                  {supportEmail}
+                </a>
+              </p>
+            )}
           </div>
 
           {COLUMNS.map((col) => (
@@ -75,7 +80,9 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-16 flex flex-col justify-between gap-3 border-t border-gold/10 pt-6 text-[10px] tracking-[0.22em] text-ivory/30 md:flex-row">
-          <span>© {new Date().getFullYear()} Celestial. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} {storeName}. All rights reserved.
+          </span>
           <span>Precision · Purity · Performance</span>
         </div>
       </div>

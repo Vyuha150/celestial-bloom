@@ -85,9 +85,15 @@ export function ProductJourney() {
     }
 
     let cleanup = () => {};
+    // The gsap import resolves after this effect may already have been torn
+    // down (React StrictMode mounts effects twice in dev). Without this guard
+    // both runs create a ScrollTrigger pinning the same stage, and the second
+    // pin shoves it off-screen — leaving a black page.
+    let cancelled = false;
 
     void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(
       ([{ gsap }, { ScrollTrigger }]) => {
+        if (cancelled) return;
         gsap.registerPlugin(ScrollTrigger);
 
         const ctx = gsap.context(() => {
@@ -171,7 +177,10 @@ export function ProductJourney() {
       },
     );
 
-    return () => cleanup();
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
   }, []);
 
   return (
