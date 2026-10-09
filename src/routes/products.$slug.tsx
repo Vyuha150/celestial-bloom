@@ -11,6 +11,7 @@ import { Turntable } from "@/components/product/Turntable";
 import { useCart } from "@/shop/useCart";
 import { openPanel } from "@/shop/cartUi";
 import { useRequireSignIn } from "@/shop/useRequireSignIn";
+import { productImageUrl } from "@/shop/cartDisplay";
 import { ApiError } from "@/lib/apiClient";
 import { HeaderActions } from "@/components/site/HeaderActions";
 import { formatMoney } from "@/lib/money";
@@ -170,23 +171,24 @@ function PurchasePanel({
   onAddToCart,
   onBuyNow,
   isBusy,
+  pack,
+  onPickPack,
 }: {
   cat: Category;
   products: ApiProduct[] | undefined;
   onAddToCart: (product: ApiProduct, qty: number) => Promise<void>;
   onBuyNow: (product: ApiProduct, qty: number) => Promise<void>;
   isBusy: boolean;
+  // The selected pack lives in ProductHero, which also shows its photos.
+  pack: ApiProduct | undefined;
+  onPickPack: (id: string) => void;
 }) {
   const packs = products ?? [];
   // Shares the page's products query (same key) just to read its status.
   const { isError, refetch } = useQuery({ queryKey: ["products", cat.slug], queryFn: () => getProducts(cat.slug) });
-  // null = nothing picked yet, so the highlighted pack is shown. A plain
-  // number can't express that: index 0 is a real choice, not "unset".
-  const [pickedId, setPickedId] = useState<string | null>(null);
   const [qty, setQty] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const pack = packs.find((t) => t._id === pickedId) ?? packs.find((t) => t.highlight) ?? packs[0];
   const price = pack?.price ?? 0;
   // Only show a struck-through price when the product really has a higher list price.
   const list = pack?.compareAtPrice && pack.compareAtPrice > price ? pack.compareAtPrice : null;
@@ -269,7 +271,7 @@ function PurchasePanel({
                 key={t._id}
                 type="button"
                 onClick={() => {
-                  setPickedId(t._id);
+                  onPickPack(t._id);
                   setError(null);
                 }}
                 aria-pressed={active}
@@ -395,6 +397,42 @@ function ShareButton({ title, text }: { title: string; text: string }) {
   );
 }
 
+// The uploaded photos of one pack: a large image with thumbnails to switch
+// between them when there is more than one.
+function PackGallery({ photos, label }: { photos: string[]; label: string }) {
+  const [active, setActive] = useState(0);
+  const current = photos[Math.min(active, photos.length - 1)];
+
+  return (
+    <div className="relative">
+      <img
+        src={productImageUrl(current)}
+        alt={label}
+        className="relative mx-auto aspect-square w-full rounded-[2rem] border border-gold/20 bg-obsidian object-contain"
+        style={{ boxShadow: "var(--shadow-gold)" }}
+      />
+      {photos.length > 1 && (
+        <div className="relative mt-4 flex flex-wrap justify-center gap-2.5">
+          {photos.map((photo, i) => (
+            <button
+              key={photo}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={`Show photo ${i + 1} of ${photos.length}`}
+              aria-pressed={i === active}
+              className={`h-16 w-16 overflow-hidden rounded-xl border transition-colors ${
+                i === active ? "border-gold" : "border-border opacity-70 hover:border-gold/50 hover:opacity-100"
+              }`}
+            >
+              <img src={productImageUrl(photo)} alt="" loading="lazy" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HighlightRail({ highlights }: { highlights: { name: string; body: string }[] }) {
   const [active, setActive] = useState(0);
   if (!highlights.length) return null;
@@ -452,6 +490,16 @@ function ProductHero({
   onBuyNow: (product: ApiProduct, qty: number) => Promise<void>;
   isBusy: boolean;
 }) {
+  // null = nothing picked yet, so the highlighted pack is shown. A plain
+  // number can't express that: index 0 is a real choice, not "unset".
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const packs = products ?? [];
+  const pack = packs.find((t) => t._id === pickedId) ?? packs.find((t) => t.highlight) ?? packs[0];
+  // Photos uploaded for the selected pack in the admin console. When there
+  // are any they take over the stage; otherwise the collection's built-in
+  // artwork is shown as before.
+  const photos = pack?.images ?? [];
+
   const stage = useRef<HTMLElement>(null);
   const mx = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 60, damping: 18, mass: 0.8 });
@@ -478,7 +526,7 @@ function ProductHero({
       onPointerMove={onMove}
       onPointerLeave={reset}
       className="relative overflow-hidden pt-32 pb-24"
-      style={{ cursor: "ew-resize" }}
+      style={{ cursor: photos.length > 0 ? undefined : "ew-resize" }}
     >
       <motion.div
         aria-hidden
@@ -514,7 +562,7 @@ function ProductHero({
               initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.1, ease }}
-              style={cat.heroSprite ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
+              style={cat.heroSprite || photos.length > 0 ? { y } : { rotateY, y, transformStyle: "preserve-3d" }}
               className="relative w-[min(460px,72vw)] will-change-transform"
             >
               <div
@@ -522,7 +570,9 @@ function ProductHero({
                 className="absolute -inset-8 rounded-[3rem]"
                 style={{ background: "var(--gradient-gold)", opacity: 0.16, filter: "blur(70px)" }}
               />
-              {cat.heroSprite ? (
+              {photos.length > 0 ? (
+                <PackGallery key={pack!._id} photos={photos} label={`${cat.title} — ${pack!.name}`} />
+              ) : cat.heroSprite ? (
                 <div className="relative mx-auto flex h-[min(489px,58vh)] w-full items-center justify-center">
                   <div
                     aria-hidden
@@ -556,7 +606,7 @@ function ProductHero({
           </div>
         </div>
 
-        {cat.heroSprite && (
+        {cat.heroSprite && photos.length === 0 && (
           <div className="pointer-events-none mt-5 flex items-center justify-center gap-3 text-[9.5px] uppercase tracking-[0.35em] text-gold/70">
             <ChevronLeft className="h-3 w-3 animate-pulse" />
             Move cursor or drag to rotate
@@ -579,7 +629,15 @@ function ProductHero({
           </motion.div>
 
           <motion.div variants={fadeUp}>
-            <PurchasePanel cat={cat} products={products} onAddToCart={onAddToCart} onBuyNow={onBuyNow} isBusy={isBusy} />
+            <PurchasePanel
+              cat={cat}
+              products={products}
+              onAddToCart={onAddToCart}
+              onBuyNow={onBuyNow}
+              isBusy={isBusy}
+              pack={pack}
+              onPickPack={setPickedId}
+            />
           </motion.div>
 
           <motion.div variants={fadeUp} className="mt-5 text-[9px] tracking-[0.3em] text-ivory/40 uppercase">

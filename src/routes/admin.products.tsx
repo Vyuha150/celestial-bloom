@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, Search, Pencil, Trash2, X, Upload } from "lucide-react";
 import {
   listProducts,
@@ -34,6 +34,12 @@ const emptyForm: ProductInput = {
   perks: [],
 };
 
+// Same limits the API enforces (see the backend's upload middleware and product validator).
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_IMAGE_MB = 8;
+const MAX_PER_UPLOAD = 6;
+const MAX_IMAGES = 10;
+
 function categoryTitle(p: AdminProduct): string {
   return typeof p.category === "string" ? p.category : p.category.title;
 }
@@ -50,15 +56,21 @@ function ProductsAdmin() {
   const { data: categories } = useQuery({ queryKey: ["admin", "categories"], queryFn: listCategories });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
+  // Images chosen while creating a product, held until it has an id.
+  const pendingImages = useRef<File[]>([]);
 
   const createMut = useMutation({
     mutationFn: (body: ProductInput) => createProduct(body),
     onSuccess: (created) => {
       invalidate();
-      // Stay open in edit mode (rather than closing) so images can be
-      // uploaded right away — the upload endpoint needs a product id,
-      // which doesn't exist until this first save completes.
+      // Stay open in edit mode (rather than closing) so the images show up
+      // as they finish uploading. The upload endpoint needs a product id,
+      // which doesn't exist until this first save completes — so any images
+      // picked on the "new product" form are sent now.
       setEditing({ id: created._id, form: editing?.form ?? emptyForm, images: created.images ?? [] });
+      const files = pendingImages.current;
+      pendingImages.current = [];
+      if (files.length) uploadMut.mutate({ id: created._id, files });
     },
   });
   const updateMut = useMutation({
@@ -106,10 +118,13 @@ function ProductsAdmin() {
       },
     });
 
-  const save = (form: ProductInput) => {
+  const save = (form: ProductInput, newImages: File[]) => {
     if (!form.name.trim() || !form.category) return;
     if (editing?.id) updateMut.mutate({ id: editing.id, body: form });
-    else createMut.mutate(form);
+    else {
+      pendingImages.current = newImages;
+      createMut.mutate(form);
+    }
   };
 
   const remove = (id: string) => {
@@ -206,6 +221,7 @@ function ProductsAdmin() {
             editing.id && removeImageMut.mutate({ id: editing.id, images: editing.images.filter((i) => i !== img) })
           }
           uploading={uploadMut.isPending}
+          uploadError={uploadMut.error ?? removeImageMut.error}
         />
       )}
     </div>
@@ -225,6 +241,7 @@ function ProductDrawer({
   onUpload,
   onRemoveImage,
   uploading,
+  uploadError,
 }: {
   isNew: boolean;
   initial: ProductInput;
@@ -232,20 +249,49 @@ function ProductDrawer({
   saving: boolean;
   error: unknown;
   onClose: () => void;
-  onSave: (p: ProductInput) => void;
+  onSave: (p: ProductInput, newImages: File[]) => void;
   productId: string | null;
   images: string[];
   onUpload: (files: File[]) => void;
   onRemoveImage: (image: string) => void;
   uploading: boolean;
+  uploadError: unknown;
 }) {
   const [p, setP] = useState<ProductInput>(initial);
   const set = <K extends keyof ProductInput>(k: K, v: ProductInput[K]) => setP((s) => ({ ...s, [k]: v }));
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Images picked before the product exists; they upload when it's saved.
+  const [queued, setQueued] = useState<File[]>([]);
+  const [pickError, setPickError] = useState<string | null>(null);
+  const previews = useMemo(() => queued.map((file) => ({ file, url: URL.createObjectURL(file) })), [queued]);
+  useEffect(() => () => previews.forEach((p) => URL.revokeObjectURL(p.url)), [previews]);
+  // Once the product has been created the queue has been handed over.
+  useEffect(() => {
+    if (productId) setQueued([]);
+  }, [productId]);
+
+  // Mirrors the server's rules, so a bad file is explained here instead of
+  // failing after an upload.
+  const pick = (picked: File[]) => {
+    setPickError(null);
+    const tooBig = picked.find((f) => f.size > MAX_IMAGE_MB * 1024 * 1024);
+    const wrongType = picked.find((f) => !IMAGE_TYPES.includes(f.type));
+    if (wrongType) return setPickError(`"${wrongType.name}" isn't a JPEG, PNG, WebP or GIF image.`);
+    if (tooBig) return setPickError(`"${tooBig.name}" is larger than ${MAX_IMAGE_MB} MB.`);
+
+    const room = MAX_IMAGES - images.length - (productId ? 0 : queued.length);
+    if (room <= 0) return setPickError(`A product can have up to ${MAX_IMAGES} images. Remove one first.`);
+    const accepted = picked.slice(0, Math.min(room, MAX_PER_UPLOAD));
+    if (accepted.length < picked.length) {
+      setPickError(`Only ${accepted.length} of the ${picked.length} images were added (up to ${MAX_PER_UPLOAD} at a time, ${MAX_IMAGES} per product).`);
+    }
+    if (productId) onUpload(accepted);
+    else setQueued((current) => [...current, ...accepted].slice(0, MAX_PER_UPLOAD));
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-obsidian/80 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="bg-midnight border border-border w-full max-w-lg p-6 space-y-4">
+      <div onClick={(e) => e.stopPropagation()} className="bg-midnight border border-border w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto p-6 space-y-4">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-eyebrow">{isNew ? "New" : "Edit"}</p>
@@ -289,54 +335,74 @@ function ProductDrawer({
 
         <div className="border-t border-border pt-4">
           <Label>Images</Label>
-          {!productId ? (
-            <p className="text-xs text-muted-foreground mt-1">Save the product first to add images.</p>
-          ) : (
-            <>
-              {images.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-2 mb-3">
-                  {images.map((img) => (
-                    <div key={img} className="relative group">
-                      <img src={`${API_URL}${img}`} alt="" className="w-full aspect-square object-cover border border-border" />
-                      <button
-                        onClick={() => onRemoveImage(img)}
-                        title="Remove image"
-                        className="absolute top-1 right-1 p-0.5 bg-obsidian/80 border border-border opacity-0 group-hover:opacity-100 hover:border-rose-400"
-                      >
-                        <X className="size-3 text-rose-400" />
-                      </button>
-                    </div>
-                  ))}
+          <p className="text-xs text-muted-foreground mt-1 mb-2">
+            JPEG, PNG, WebP or GIF, up to {MAX_IMAGE_MB} MB each.
+            {!productId && " They upload when you save the product."}
+          </p>
+          {(images.length > 0 || previews.length > 0) && (
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {images.map((img) => (
+                <div key={img} className="relative group">
+                  <img src={`${API_URL}${img}`} alt="" className="w-full aspect-square object-cover border border-border" />
+                  <button
+                    type="button"
+                    onClick={() => onRemoveImage(img)}
+                    title="Remove image"
+                    aria-label="Remove image"
+                    className="absolute top-1 right-1 p-0.5 bg-obsidian/80 border border-border opacity-0 group-hover:opacity-100 focus:opacity-100 hover:border-rose-400"
+                  >
+                    <X className="size-3 text-rose-400" />
+                  </button>
                 </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files ?? []);
-                  if (files.length) onUpload(files);
-                  e.target.value = "";
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs border border-border hover:border-gold disabled:opacity-50"
-              >
-                <Upload className="size-3.5" /> {uploading ? "Uploading…" : "Upload images"}
-              </button>
-            </>
+              ))}
+              {previews.map(({ file, url }) => (
+                <div key={url} className="relative group">
+                  <img src={url} alt={file.name} className="w-full aspect-square object-cover border border-dashed border-gold/50 opacity-80" />
+                  <button
+                    type="button"
+                    onClick={() => setQueued((current) => current.filter((f) => f !== file))}
+                    title="Remove image"
+                    aria-label={`Remove ${file.name}`}
+                    className="absolute top-1 right-1 p-0.5 bg-obsidian/80 border border-border opacity-0 group-hover:opacity-100 focus:opacity-100 hover:border-rose-400"
+                  >
+                    <X className="size-3 text-rose-400" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={IMAGE_TYPES.join(",")}
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              if (files.length) pick(files);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs border border-border hover:border-gold disabled:opacity-50"
+          >
+            <Upload className="size-3.5" /> {uploading ? "Uploading…" : productId ? "Upload images" : "Choose images"}
+          </button>
+          {pickError && <p role="alert" className="mt-2 text-xs text-rose-300">{pickError}</p>}
+          {uploadError instanceof Error && (
+            <p role="alert" className="mt-2 text-xs text-rose-300">
+              Image upload failed: {uploadError.message}
+            </p>
           )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-border">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-border hover:bg-midnight">Cancel</button>
           <button
-            onClick={() => onSave(p)}
+            onClick={() => onSave(p, queued)}
             disabled={saving}
             className="px-4 py-2 text-sm bg-gold text-obsidian font-medium hover:bg-gold/90 disabled:opacity-60"
           >
